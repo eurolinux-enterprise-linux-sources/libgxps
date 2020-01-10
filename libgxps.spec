@@ -1,6 +1,6 @@
 Name:           libgxps
 Version:        0.2.2
-Release:        7.1%{?dist}
+Release:        9%{?dist}
 Summary:        GObject based library for handling and rendering XPS documents
 Group:          System Environment/Libraries
 
@@ -82,6 +82,12 @@ chrpath --delete $RPM_BUILD_ROOT%{_bindir}/xpsto*
 
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.2.2-9
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.2.2-8
+- Mass rebuild 2013-12-27
+
 * Tue Mar 26 2013 Daniel Mach <dmach@redhat.com> - 0.2.2-7.1
 - Rebuild for libarchive
 

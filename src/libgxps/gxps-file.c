@@ -17,9 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <string.h>
 
@@ -73,6 +71,7 @@ gxps_file_error_quark (void)
 #define REL_METATADA_CORE_PROPS  "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties"
 #define REL_METATADA_THUMBNAIL   "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail"
 #define REL_FIXED_REPRESENTATION "http://schemas.microsoft.com/xps/2005/06/fixedrepresentation"
+#define REL_OXPS_FIXED_REPRESENTATION "http://schemas.openxps.org/oxps/v1.0/fixedrepresentation"
 
 /* Relationship parser */
 static void
@@ -110,7 +109,8 @@ rels_start_element (GMarkupParseContext  *context,
 			return;
 		}
 
-		if (strcmp (type, REL_FIXED_REPRESENTATION) == 0) {
+		if (strcmp (type, REL_FIXED_REPRESENTATION) == 0 ||
+		    strcmp (type, REL_OXPS_FIXED_REPRESENTATION) == 0) {
 			xps->priv->fixed_repr = g_strdup (target);
 		} else if (strcmp (type, REL_METATADA_THUMBNAIL) == 0) {
 			xps->priv->thumbnail = g_strdup (target);

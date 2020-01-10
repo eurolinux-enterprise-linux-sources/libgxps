@@ -1,6 +1,6 @@
---- libgxps-0.2.5/libgxps/gxps-archive.h
-+++ libgxps-0.2.5/libgxps/gxps-archive.h
-@@ -37,13 +37,18 @@ G_BEGIN_DECLS
+--- libgxps-0.3.0/libgxps/gxps-archive.h
++++ libgxps-0.3.0/libgxps/gxps-archive.h
+@@ -38,14 +38,20 @@ G_BEGIN_DECLS
  typedef struct _GXPSArchive      GXPSArchive;
  typedef struct _GXPSArchiveClass GXPSArchiveClass;
  
@@ -12,6 +12,8 @@
 +GXPS_AVAILABLE_IN_ALL
  gboolean          gxps_archive_has_entry      (GXPSArchive      *archive,
  					       const gchar      *path);
++GXPS_AVAILABLE_IN_ALL
+ GXPSResources    *gxps_archive_get_resources  (GXPSArchive      *archive);
 +GXPS_AVAILABLE_IN_ALL
  GInputStream     *gxps_archive_open           (GXPSArchive      *archive,
  					       const gchar      *path);

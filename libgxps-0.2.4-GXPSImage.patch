@@ -1,5 +1,5 @@
---- libgxps-0.2.5/libgxps/gxps-brush.c
-+++ libgxps-0.2.5/libgxps/gxps-brush.c
+--- libgxps-0.3.0/libgxps/gxps-brush.c
++++ libgxps-0.3.0/libgxps/gxps-brush.c
 @@ -965,7 +965,7 @@ brush_end_element (GMarkupParseContext
                  g_markup_parse_context_pop (context);
          } else if (strcmp (element_name, "ImageBrush") == 0) {
@@ -36,8 +36,8 @@
                                                                             brush_image->viewbox.x,
                                                                             brush_image->viewbox.y,
                                                                             brush_image->viewbox.width,
---- libgxps-0.2.5/libgxps/gxps-images.c
-+++ libgxps-0.2.5/libgxps/gxps-images.c
+--- libgxps-0.3.0/libgxps/gxps-images.c
++++ libgxps-0.3.0/libgxps/gxps-images.c
 @@ -88,6 +88,45 @@ multiply_alpha (int alpha, int color)
  	return ((temp + (temp >> 8)) >> 8);
  }
@@ -118,7 +118,7 @@
  		g_free (row_pointers);
  		g_free (data);
  		return NULL;
-@@ -295,13 +335,13 @@ gxps_images_create_from_png (GXPSArchive
+@@ -295,13 +335,12 @@ gxps_images_create_from_png (GXPSArchive
  		return NULL;
  	}
  
@@ -135,11 +135,10 @@
 +	res_y = png_get_y_pixels_per_meter (png, info) * METERS_PER_INCH;
 +	if (res_y == 0)
 +		res_y = 96;
-+        image_set_res (image, res_x, res_y);
  
  	data = g_malloc (png_height * stride);
  	row_pointers = g_new (png_byte *, png_height);
-@@ -315,23 +355,23 @@ gxps_images_create_from_png (GXPSArchive
+@@ -315,23 +354,25 @@ gxps_images_create_from_png (GXPSArchive
  	g_object_unref (stream);
  	g_free (row_pointers);
  
@@ -159,6 +158,8 @@
  	}
  
 -	status = cairo_surface_set_user_data (image->surface,
++        image_set_res (image, res_x, res_y);
++
 +	status = cairo_surface_set_user_data (image,
  					      &image_data_cairo_key,
  					      data,
@@ -398,8 +399,8 @@
 -
 -	g_slice_free (GXPSImage, image);
 -}
---- libgxps-0.2.5/libgxps/gxps-images.h
-+++ libgxps-0.2.5/libgxps/gxps-images.h
+--- libgxps-0.3.0/libgxps/gxps-images.h
++++ libgxps-0.3.0/libgxps/gxps-images.h
 @@ -25,18 +25,9 @@
  
  G_BEGIN_DECLS
@@ -422,8 +423,8 @@
  
  G_END_DECLS
  
---- libgxps-0.2.5/libgxps/gxps-page.c
-+++ libgxps-0.2.5/libgxps/gxps-page.c
+--- libgxps-0.3.0/libgxps/gxps-page.c
++++ libgxps-0.3.0/libgxps/gxps-page.c
 @@ -77,12 +77,12 @@ gxps_page_error_quark (void)
  }
  
@@ -454,8 +455,8 @@
  	return image;
  }
  
---- libgxps-0.2.5/libgxps/gxps-page-private.h
-+++ libgxps-0.2.5/libgxps/gxps-page-private.h
+--- libgxps-0.3.0/libgxps/gxps-page-private.h
++++ libgxps-0.3.0/libgxps/gxps-page-private.h
 @@ -58,9 +58,9 @@ struct _GXPSRenderContext {
          GXPSBrushVisual *visual;
  };

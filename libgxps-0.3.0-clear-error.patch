@@ -1,0 +1,30 @@
+From 672c65ea8cbd2bcfd82a6b6498a4f1eb9daf5ec5 Mon Sep 17 00:00:00 2001
+From: Carlos Garcia Campos <carlosgc@gnome.org>
+Date: Fri, 8 Dec 2017 11:20:25 +0100
+Subject: [PATCH 2/2] gxps-images: clear the error before trying to load an
+ image again
+
+In gxps_images_get_image() we first try with the image file extension,
+and if that fails then we try guessing the content type. If the image
+load failed the first time, the GError might be filled already, so we
+need to clear it before passing it to create functions again.
+---
+ libgxps/gxps-images.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/libgxps/gxps-images.c b/libgxps/gxps-images.c
+index 19cb1c0..4dcf9e2 100644
+--- a/libgxps/gxps-images.c
++++ b/libgxps/gxps-images.c
+@@ -925,6 +925,8 @@ gxps_images_get_image (GXPSArchive *zip,
+ 	if (!image) {
+ 		gchar *mime_type;
+ 
++                g_clear_error(error);
++
+ 		mime_type = gxps_images_guess_content_type (zip, image_uri);
+ 		if (g_strcmp0 (mime_type, "image/png") == 0) {
+ 			image = gxps_images_create_from_png (zip, image_uri, error);
+-- 
+2.17.1
+

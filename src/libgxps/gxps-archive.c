@@ -18,9 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <string.h>
 #include <archive_entry.h>
@@ -39,6 +37,8 @@ struct _GXPSArchive {
 	GError     *init_error;
 	GFile      *filename;
 	GHashTable *entries;
+
+	GXPSResources *resources;
 };
 
 struct _GXPSArchiveClass {
@@ -182,6 +182,7 @@ gxps_archive_finalize (GObject *object)
 	g_clear_pointer (&archive->entries, g_hash_table_unref);
 	g_clear_object (&archive->filename);
 	g_clear_error (&archive->init_error);
+	g_clear_object (&archive->resources);
 
 	G_OBJECT_CLASS (gxps_archive_parent_class)->finalize (object);
 }
@@ -256,6 +257,7 @@ gxps_archive_initable_init (GInitable     *initable,
 	GXPSArchive          *archive;
 	ZipArchive           *zip;
 	struct archive_entry *entry;
+	const gchar          *pathname;
 
 	archive = GXPS_ARCHIVE (initable);
 
@@ -280,7 +282,9 @@ gxps_archive_initable_init (GInitable     *initable,
 
         while (gxps_zip_archive_iter_next (zip, &entry)) {
                 /* FIXME: We can ignore directories here */
-                g_hash_table_add (archive->entries, g_strdup (archive_entry_pathname (entry)));
+                pathname = archive_entry_pathname (entry);
+                if (pathname != NULL)
+                        g_hash_table_add (archive->entries, g_strdup (pathname));
                 archive_read_data_skip (zip->archive);
         }
 
@@ -316,6 +320,19 @@ gxps_archive_has_entry (GXPSArchive *archive,
 		path++;
 
 	return g_hash_table_contains (archive->entries, path);
+}
+
+GXPSResources *
+gxps_archive_get_resources (GXPSArchive *archive)
+{
+	g_return_val_if_fail (GXPS_IS_ARCHIVE (archive), NULL);
+
+	if (archive->resources == NULL)
+		archive->resources = g_object_new (GXPS_TYPE_RESOURCES,
+		                                   "archive", archive,
+		                                   NULL);
+
+	return archive->resources;
 }
 
 /* GXPSArchiveInputStream */

@@ -1,16 +1,26 @@
 Name:           libgxps
-Version:        0.2.5
-Release:        1%{?dist}
+Version:        0.3.0
+Release:        4%{?dist}
 Summary:        GObject based library for handling and rendering XPS documents
 Group:          System Environment/Libraries
 
 License:        LGPLv2+
-URL:            http://live.gnome.org/libgxps
-Source0:        http://ftp.gnome.org/pub/gnome/sources/%{name}/0.2/%{name}-%{version}.tar.xz
+URL:            https://wiki.gnome.org/Projects/libgxps
+Source0:        https://ftp.gnome.org/pub/gnome/sources/%{name}/0.3/%{name}-%{version}.tar.xz
 
 Patch0:         libgxps-0.2.4-GXPSImage.patch
 Patch1:         libgxps-0.2.5-private-methods.patch
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1574844
+Patch2:         libgxps-0.3.0-archive-fill-error.patch
+Patch3:         libgxps-0.3.0-archive-handle-error.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1591133
+Patch4:         libgxps-0.3.0-integer-overflow.patch
+Patch5:         libgxps-0.3.0-clear-error.patch
+
+BuildRequires:  meson
+BuildRequires:  gcc
 BuildRequires:  gtk3-devel
 BuildRequires:  glib2-devel
 BuildRequires:  gobject-introspection-devel
@@ -21,7 +31,6 @@ BuildRequires:  freetype-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libtiff-devel
 BuildRequires:  lcms2-devel
-BuildRequires:  chrpath
 
 %description
 libgxps is a GObject based library for handling and rendering XPS
@@ -47,34 +56,30 @@ documents using the %{name} library.
 
 
 %prep
-%setup -q
-%patch0 -p1 -b .GXPSImage
-%patch1 -p1 -b .private-methods
+%autosetup -p1
 
 
 %build
-autoreconf -ivf
-%configure --disable-static --enable-man
-make %{?_smp_mflags}
+%meson -Denable-gtk-doc=true -Denable-man=true
+%meson_build
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
-find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
-chrpath --delete $RPM_BUILD_ROOT%{_bindir}/xpsto*
+%meson_install
 
 
 %post -p /sbin/ldconfig
+
 
 %postun -p /sbin/ldconfig
 
 
 %files
-%doc AUTHORS ChangeLog NEWS README TODO
+%doc AUTHORS MAINTAINERS NEWS README TODO
 %license COPYING
 %{_libdir}/*.so.*
 %{_libdir}/girepository-1.0/*.typelib
+
 
 %files devel
 %{_includedir}/*
@@ -83,12 +88,30 @@ chrpath --delete $RPM_BUILD_ROOT%{_bindir}/xpsto*
 %{_datadir}/gir-1.0/*.gir
 %{_datadir}/gtk-doc/html/libgxps
 
+
 %files tools
 %{_bindir}/xpsto*
 %{_mandir}/man1/xpsto*.1.gz
 
 
 %changelog
+* Thu Jun 21 2018 Marek Kasik <mkasik@redhat.com> - 0.3.0-4
+- Fix integer overflow in png decoder
+- Resolves: #1591133
+
+* Fri Jun 01 2018 Marek Kasik <mkasik@redhat.com> - 0.3.0-3
+- Fix crash in loading of png image
+- Resolves: #1575188
+
+* Fri Jun 01 2018 Marek Kasik <mkasik@redhat.com> - 0.3.0-2
+- Ensure gxps_archive_read_entry() fills the GError in case of failure
+- Handle errors returned by archive_read_data()
+- Resolves: #1574844
+
+* Thu May 31 2018 Marek Kasik <mkasik@redhat.com> - 0.3.0-1
+- Update to 0.3.0
+- Resolves: #1569731
+
 * Tue Feb 28 2017 Marek Kasik <mkasik@redhat.com> - 0.2.5-1
 - Update to newly released 0.2.5
 - Preserve ABI by exporting the same set of methods as before

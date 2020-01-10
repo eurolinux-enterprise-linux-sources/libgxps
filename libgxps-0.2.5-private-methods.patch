@@ -1,0 +1,190 @@
+--- libgxps-0.2.5/libgxps/gxps-archive.h
++++ libgxps-0.2.5/libgxps/gxps-archive.h
+@@ -37,13 +37,18 @@ G_BEGIN_DECLS
+ typedef struct _GXPSArchive      GXPSArchive;
+ typedef struct _GXPSArchiveClass GXPSArchiveClass;
+ 
++GXPS_AVAILABLE_IN_ALL
+ GType             gxps_archive_get_type       (void) G_GNUC_CONST;
++GXPS_AVAILABLE_IN_ALL
+ GXPSArchive      *gxps_archive_new            (GFile            *filename,
+ 					       GError          **error);
++GXPS_AVAILABLE_IN_ALL
+ gboolean          gxps_archive_has_entry      (GXPSArchive      *archive,
+ 					       const gchar      *path);
++GXPS_AVAILABLE_IN_ALL
+ GInputStream     *gxps_archive_open           (GXPSArchive      *archive,
+ 					       const gchar      *path);
++GXPS_AVAILABLE_IN_ALL
+ gboolean          gxps_archive_read_entry     (GXPSArchive      *archive,
+ 					       const gchar      *path,
+ 					       guchar          **buffer,
+--- libgxps-0.2.5/libgxps/gxps-brush.h
++++ libgxps-0.2.5/libgxps/gxps-brush.h
+@@ -33,12 +33,16 @@ struct _GXPSBrush {
+         gdouble            opacity;
+ };
+ 
++GXPS_AVAILABLE_IN_ALL
+ GXPSBrush *gxps_brush_new               (GXPSRenderContext   *ctx);
++GXPS_AVAILABLE_IN_ALL
+ void       gxps_brush_free              (GXPSBrush           *brush);
++GXPS_AVAILABLE_IN_ALL
+ gboolean   gxps_brush_solid_color_parse (const gchar         *data,
+                                          GXPSArchive         *zip,
+                                          gdouble              alpha,
+                                          cairo_pattern_t    **pattern);
++GXPS_AVAILABLE_IN_ALL
+ void       gxps_brush_parser_push       (GMarkupParseContext *context,
+                                          GXPSBrush           *brush);
+ 
+--- libgxps-0.2.5/libgxps/gxps-color.h
++++ libgxps-0.2.5/libgxps/gxps-color.h
+@@ -34,6 +34,7 @@ typedef struct _GXPSColor {
+         gdouble blue;
+ } GXPSColor;
+ 
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_color_new_for_icc (GXPSArchive *zip,
+                                  const gchar *icc_profile_uri,
+                                  gdouble     *values,
+--- libgxps-0.2.5/libgxps/gxps-fonts.h
++++ libgxps-0.2.5/libgxps/gxps-fonts.h
+@@ -25,6 +25,7 @@
+ 
+ G_BEGIN_DECLS
+ 
++GXPS_AVAILABLE_IN_ALL
+ cairo_font_face_t *gxps_fonts_get_font (GXPSArchive *zip,
+ 					const gchar *font_uri,
+ 					GError     **error);
+--- libgxps-0.2.5/libgxps/gxps-glyphs.h
++++ libgxps-0.2.5/libgxps/gxps-glyphs.h
+@@ -45,12 +45,15 @@ struct _GXPSGlyphs {
+         guint              italic      : 1;
+ };
+ 
++GXPS_AVAILABLE_IN_ALL
+ GXPSGlyphs *gxps_glyphs_new             (GXPSRenderContext     *ctx,
+                                          gchar                 *font_uri,
+                                          gdouble                font_size,
+                                          gdouble                origin_x,
+                                          gdouble                origin_y);
++GXPS_AVAILABLE_IN_ALL
+ void        gxps_glyphs_free            (GXPSGlyphs            *glyphs);
++GXPS_AVAILABLE_IN_ALL
+ gboolean    gxps_glyphs_to_cairo_glyphs (GXPSGlyphs            *gxps_glyphs,
+                                          cairo_scaled_font_t   *scaled_font,
+                                          const gchar           *utf8,
+@@ -59,6 +62,7 @@ gboolean    gxps_glyphs_to_cairo_glyphs
+                                          cairo_text_cluster_t **clusters,
+                                          int                   *num_clusters,
+                                          GError               **error);
++GXPS_AVAILABLE_IN_ALL
+ void        gxps_glyphs_parser_push     (GMarkupParseContext   *context,
+                                          GXPSGlyphs            *glyphs);
+ 
+--- libgxps-0.2.5/libgxps/gxps-images.h
++++ libgxps-0.2.5/libgxps/gxps-images.h
+@@ -25,6 +25,7 @@
+ 
+ G_BEGIN_DECLS
+ 
++GXPS_AVAILABLE_IN_ALL
+ cairo_surface_t *gxps_images_get_image (GXPSArchive  *zip,
+                                         const gchar  *image_uri,
+                                         GError      **error);
+--- libgxps-0.2.5/libgxps/gxps-matrix.h
++++ libgxps-0.2.5/libgxps/gxps-matrix.h
+@@ -32,10 +32,14 @@ struct _GXPSMatrix {
+         cairo_matrix_t     matrix;
+ };
+ 
++GXPS_AVAILABLE_IN_ALL
+ GXPSMatrix *gxps_matrix_new         (GXPSRenderContext   *ctx);
++GXPS_AVAILABLE_IN_ALL
+ void        gxps_matrix_free        (GXPSMatrix          *matrix);
++GXPS_AVAILABLE_IN_ALL
+ gboolean    gxps_matrix_parse       (const gchar         *data,
+                                      cairo_matrix_t      *matrix);
++GXPS_AVAILABLE_IN_ALL
+ void        gxps_matrix_parser_push (GMarkupParseContext *context,
+                                      GXPSMatrix          *matrix);
+ 
+--- libgxps-0.2.5/libgxps/gxps-page-private.h
++++ libgxps-0.2.5/libgxps/gxps-page-private.h
+@@ -58,9 +58,11 @@ struct _GXPSRenderContext {
+         GXPSBrushVisual *visual;
+ };
+ 
++GXPS_AVAILABLE_IN_ALL
+ cairo_surface_t *gxps_page_get_image          (GXPSPage            *page,
+                                                const gchar         *image_uri,
+                                                GError             **error);
++GXPS_AVAILABLE_IN_ALL
+ void       gxps_page_render_parser_push (GMarkupParseContext *context,
+                                          GXPSRenderContext   *ctx);
+ 
+--- libgxps-0.2.5/libgxps/gxps-parse-utils.h
++++ libgxps-0.2.5/libgxps/gxps-parse-utils.h
+@@ -24,9 +24,11 @@
+ 
+ G_BEGIN_DECLS
+ 
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_parse_stream                  (GMarkupParseContext  *context,
+                                              GInputStream         *stream,
+                                              GError              **error);
++GXPS_AVAILABLE_IN_ALL
+ void     gxps_parse_error                   (GMarkupParseContext  *context,
+                                              const gchar          *source,
+                                              GMarkupError          error_type,
+@@ -34,21 +36,29 @@ void     gxps_parse_error
+                                              const gchar          *attribute_name,
+                                              const gchar          *content,
+                                              GError              **error);
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_value_get_int                 (const gchar          *value,
+                                              gint                 *int_value);
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_value_get_double              (const gchar          *value,
+                                              gdouble              *double_value);
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_value_get_double_positive     (const gchar          *value,
+                                              gdouble              *double_value);
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_value_get_double_non_negative (const gchar          *value,
+                                              gdouble              *double_value);
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_value_get_boolean             (const gchar          *value,
+                                              gboolean             *boolean_value);
++GXPS_AVAILABLE_IN_ALL
+ gboolean gxps_point_parse                   (const gchar          *point,
+                                              gdouble              *x,
+                                              gdouble              *y);
++GXPS_AVAILABLE_IN_ALL
+ void     gxps_parse_skip_number             (gchar               **iter,
+                                              const gchar          *end);
++GXPS_AVAILABLE_IN_ALL
+ gchar   *gxps_resolve_relative_path         (const gchar          *source,
+                                              const gchar          *target);
+ 
+--- libgxps-0.2.5/libgxps/gxps-path.h
++++ libgxps-0.2.5/libgxps/gxps-path.h
+@@ -50,12 +50,16 @@ struct _GXPSPath {
+         gboolean           is_closed  : 1;
+ };
+ 
++GXPS_AVAILABLE_IN_ALL
+ GXPSPath *gxps_path_new         (GXPSRenderContext   *ctx);
++GXPS_AVAILABLE_IN_ALL
+ void      gxps_path_free        (GXPSPath            *path);
++GXPS_AVAILABLE_IN_ALL
+ gboolean  gxps_path_parse       (const gchar         *data,
+                                  cairo_t             *cr,
+                                  GError             **error);
+ 
++GXPS_AVAILABLE_IN_ALL
+ void      gxps_path_parser_push (GMarkupParseContext *context,
+                                  GXPSPath            *path);
+ 

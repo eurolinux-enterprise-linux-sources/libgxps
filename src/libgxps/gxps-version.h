@@ -55,7 +55,7 @@
  * The micro version number of the GXPS header files (e.g. in GXPS version
  * 0.1.2 this is 2.)
  */
-#define GXPS_MICRO_VERSION (2)
+#define GXPS_MICRO_VERSION (5)
 
 /**
  * GXPS_VERSION_STRING:
@@ -64,7 +64,7 @@
  *
  * Since: 0.2.1
  */
-#define GXPS_VERSION_STRING "0.2.2"
+#define GXPS_VERSION_STRING "0.2.5"
 
 /**
  * GXPS_CHECK_VERSION:
@@ -81,5 +81,30 @@
         (GXPS_MAJOR_VERSION > (major) ||                                    \
          (GXPS_MAJOR_VERSION == (major) && GXPS_MINOR_VERSION > (minor)) || \
          (GXPS_MAJOR_VERSION == (major) && GXPS_MINOR_VERSION == (minor) && GXPS_MICRO_VERSION >= (micro)))
+
+#ifndef _GXPS_EXTERN
+#define _GXPS_EXTERN extern
+#endif
+
+/* We prefix variable declarations so they can
+ * properly get exported in Windows DLLs.
+ */
+#ifndef GXPS_VAR
+#  ifdef G_PLATFORM_WIN32
+#    ifdef GXPS_COMPILATION
+#      ifdef DLL_EXPORT
+#        define GXPS_VAR __declspec(dllexport)
+#      else /* !DLL_EXPORT */
+#        define GXPS_VAR extern
+#      endif /* !DLL_EXPORT */
+#    else /* !GXPS_COMPILATION */
+#      define GXPS_VAR extern __declspec(dllimport)
+#    endif /* !GXPS_COMPILATION */
+#  else /* !G_PLATFORM_WIN32 */
+#    define GXPS_VAR _GXPS_EXTERN
+#  endif /* !G_PLATFORM_WIN32 */
+#endif /* GXPS_VAR */
+
+#define GXPS_AVAILABLE_IN_ALL                   _GXPS_EXTERN
 
 #endif /* __GXPS_VERSION_H__ */

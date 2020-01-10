@@ -23,6 +23,7 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 #include <archive.h>
+#include <libgxps/gxps-version.h>
 
 G_BEGIN_DECLS
 
@@ -35,12 +36,10 @@ G_BEGIN_DECLS
 
 typedef struct _GXPSArchive      GXPSArchive;
 typedef struct _GXPSArchiveClass GXPSArchiveClass;
-typedef struct _GXPSArchiveEntry GXPSArchiveEntry;
 
 GType             gxps_archive_get_type       (void) G_GNUC_CONST;
 GXPSArchive      *gxps_archive_new            (GFile            *filename,
 					       GError          **error);
-
 gboolean          gxps_archive_has_entry      (GXPSArchive      *archive,
 					       const gchar      *path);
 GInputStream     *gxps_archive_open           (GXPSArchive      *archive,

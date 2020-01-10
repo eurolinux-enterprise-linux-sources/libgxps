@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -180,11 +182,13 @@ fixed_doc_end_element (GMarkupParseContext  *context,
 		GList *l;
 
 		data->doc->priv->n_pages = data->n_pages;
-		data->doc->priv->pages = g_new (Page *, data->n_pages);
+                if (data->doc->priv->n_pages > 0) {
+                        data->doc->priv->pages = g_new (Page *, data->n_pages);
 
-		for (l = data->pages; l; l = g_list_next (l))
-			data->doc->priv->pages[--data->n_pages] = (Page *)l->data;
-		g_list_free (data->pages);
+                        for (l = data->pages; l; l = g_list_next (l))
+                                data->doc->priv->pages[--data->n_pages] = (Page *)l->data;
+                }
+                g_list_free (data->pages);
 	} else if (strcmp (element_name, "LinkTarget") == 0) {
 		/* Do Nothing */
 	} else {
@@ -316,20 +320,9 @@ gxps_document_finalize (GObject *object)
 {
 	GXPSDocument *doc = GXPS_DOCUMENT (object);
 
-	if (doc->priv->zip) {
-		g_object_unref (doc->priv->zip);
-		doc->priv->zip = NULL;
-	}
-
-	if (doc->priv->source) {
-		g_free (doc->priv->source);
-		doc->priv->source = NULL;
-	}
-
-	if (doc->priv->structure) {
-		g_free (doc->priv->structure);
-		doc->priv->structure = NULL;
-	}
+	g_clear_object (&doc->priv->zip);
+	g_clear_pointer (&doc->priv->source, g_free);
+	g_clear_pointer (&doc->priv->structure, g_free);
 
 	if (doc->priv->pages) {
 		gint i;

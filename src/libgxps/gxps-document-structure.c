@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <string.h>
 
@@ -74,9 +76,7 @@ outline_node_free (OutlineNode *node)
 
 	g_free (node->desc);
 	g_free (node->target);
-
-	if (node->children)
-		g_list_foreach (node->children, (GFunc)outline_node_free, NULL);
+	g_list_free_full (node->children, (GDestroyNotify)outline_node_free);
 
 	g_slice_free (OutlineNode, node);
 }
@@ -86,20 +86,10 @@ gxps_document_structure_finalize (GObject *object)
 {
 	GXPSDocumentStructure *structure = GXPS_DOCUMENT_STRUCTURE (object);
 
-	if (structure->priv->zip) {
-		g_object_unref (structure->priv->zip);
-		structure->priv->zip = NULL;
-	}
-
-	if (structure->priv->source) {
-		g_free (structure->priv->source);
-		structure->priv->source = NULL;
-	}
-
-	if (structure->priv->outline) {
-		g_list_foreach (structure->priv->outline, (GFunc)outline_node_free, NULL);
-		structure->priv->outline = NULL;
-	}
+	g_clear_object (&structure->priv->zip);
+	g_clear_pointer (&structure->priv->source, g_free);
+	g_list_free_full (structure->priv->outline, (GDestroyNotify)outline_node_free);
+	structure->priv->outline = NULL;
 
 	G_OBJECT_CLASS (gxps_document_structure_parent_class)->finalize (object);
 }
@@ -252,10 +242,12 @@ outline_start_element (GMarkupParseContext  *context,
 			ctx->prevs = g_list_delete_link (ctx->prevs, ctx->prevs);
 		}
 
-		if (level == 1)
+		if (level == 1) {
 			ctx->outline = g_list_prepend (ctx->outline, node);
-		else
+                } else {
+                        g_assert (node->parent != NULL);
 			node->parent->children = g_list_prepend (node->parent->children, node);
+                }
 
 		ctx->prevs = g_list_prepend (ctx->prevs, node);
 		ctx->level = level;

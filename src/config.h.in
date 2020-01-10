@@ -15,8 +15,14 @@
 /* Have Little CMS 2 library */
 #undef HAVE_LIBLCMS2
 
+/* Have PNG library */
+#undef HAVE_LIBPNG
+
 /* Have Tiff library */
 #undef HAVE_LIBTIFF
+
+/* Defines if localtime_r is available on your system */
+#undef HAVE_LOCALTIME_R
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -45,8 +51,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Name of package */
@@ -90,3 +95,6 @@
 
 /* Enable LFS */
 #undef _FILE_OFFSET_BITS
+
+/* defines how to decorate public symbols while building */
+#undef _GXPS_EXTERN

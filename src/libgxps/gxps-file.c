@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <string.h>
 
@@ -47,7 +49,7 @@ enum {
 struct _GXPSFilePrivate {
 	GFile       *file;
 	GXPSArchive *zip;
-	GList       *docs;
+	GPtrArray   *docs;
 
 	gboolean     initialized;
 	GError      *init_error;
@@ -176,11 +178,10 @@ fixed_repr_start_element (GMarkupParseContext  *context,
 
 		for (i = 0; names[i]; i++) {
 			if (strcmp (names[i], "Source") == 0) {
-				xps->priv->docs = g_list_prepend (xps->priv->docs,
-								  gxps_resolve_relative_path (xps->priv->fixed_repr, values[i]));
+				g_ptr_array_add (xps->priv->docs,
+						 gxps_resolve_relative_path (xps->priv->fixed_repr, values[i]));
 			}
 		}
-		xps->priv->docs = g_list_reverse (xps->priv->docs);
 	} else if (strcmp (element_name, "FixedDocumentSequence") == 0) {
 		/* Nothing to do */
 	} else {
@@ -229,37 +230,12 @@ gxps_file_finalize (GObject *object)
 {
 	GXPSFile *xps = GXPS_FILE (object);
 
-	if (xps->priv->zip) {
-		g_object_unref (xps->priv->zip);
-		xps->priv->zip = NULL;
-	}
-
-	if (xps->priv->file) {
-		g_object_unref (xps->priv->file);
-		xps->priv->file = NULL;
-	}
-
-	if (xps->priv->docs) {
-		g_list_foreach (xps->priv->docs, (GFunc)g_free, NULL);
-		g_list_free (xps->priv->docs);
-		xps->priv->docs = NULL;
-	}
-
-	if (xps->priv->fixed_repr) {
-		g_free (xps->priv->fixed_repr);
-		xps->priv->fixed_repr = NULL;
-	}
-
-	if (xps->priv->thumbnail) {
-		g_free (xps->priv->thumbnail);
-		xps->priv->thumbnail = NULL;
-	}
-
-	if (xps->priv->core_props) {
-		g_free (xps->priv->core_props);
-		xps->priv->core_props = NULL;
-	}
-
+	g_clear_object (&xps->priv->zip);
+	g_clear_object (&xps->priv->file);
+	g_clear_pointer (&xps->priv->docs, g_ptr_array_unref);
+	g_clear_pointer (&xps->priv->fixed_repr, g_free);
+	g_clear_pointer (&xps->priv->thumbnail, g_free);
+	g_clear_pointer (&xps->priv->core_props, g_free);
 	g_clear_error (&xps->priv->init_error);
 
 	G_OBJECT_CLASS (gxps_file_parent_class)->finalize (object);
@@ -329,6 +305,8 @@ gxps_file_initable_init (GInitable     *initable,
 
 	xps->priv->initialized = TRUE;
 
+	xps->priv->docs = g_ptr_array_new_with_free_func (g_free);
+
 	xps->priv->zip = gxps_archive_new (xps->priv->file, &xps->priv->init_error);
 	if (!xps->priv->zip) {
 		g_propagate_error (error, g_error_copy (xps->priv->init_error));
@@ -354,7 +332,7 @@ gxps_file_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
-	if (!xps->priv->docs) {
+	if (xps->priv->docs->len == 0) {
 		g_set_error_literal (&xps->priv->init_error,
 				     GXPS_FILE_ERROR,
 				     GXPS_FILE_ERROR_INVALID,
@@ -406,7 +384,7 @@ gxps_file_get_n_documents (GXPSFile *xps)
 {
 	g_return_val_if_fail (GXPS_IS_FILE (xps), 0);
 
-	return g_list_length (xps->priv->docs);
+	return xps->priv->docs->len;
 }
 
 /**
@@ -429,8 +407,9 @@ gxps_file_get_document (GXPSFile *xps,
 	const gchar  *source;
 
 	g_return_val_if_fail (GXPS_IS_FILE (xps), NULL);
+	g_return_val_if_fail (n_doc < xps->priv->docs->len, NULL);
 
-	source = g_list_nth_data (xps->priv->docs, n_doc);
+	source = g_ptr_array_index (xps->priv->docs, n_doc);
 	g_assert (source != NULL);
 
 	return _gxps_document_new (xps->priv->zip, source, error);
@@ -456,20 +435,43 @@ gint
 gxps_file_get_document_for_link_target (GXPSFile       *xps,
 					GXPSLinkTarget *target)
 {
-	GList       *l;
-	guint        n_doc = 0;
+	guint        i;
 	const gchar *uri;
 
         g_return_val_if_fail (GXPS_IS_FILE (xps), -1);
         g_return_val_if_fail (target != NULL, -1);
 
 	uri = gxps_link_target_get_uri (target);
-	for (l = xps->priv->docs; l; l = g_list_next (l)) {
-		if (g_ascii_strcasecmp (uri, (gchar *)l->data) == 0)
-			return n_doc;
-		n_doc++;
+	for (i = 0; i < xps->priv->docs->len; ++i) {
+		if (g_ascii_strcasecmp (uri, (gchar *)xps->priv->docs->pdata[i]) == 0)
+			return i;
 	}
 
 	return -1;
 }
 
+/**
+ * gxps_file_get_core_properties:
+ * @xps: a #GXPSFile
+ * @error: #GError for error reporting, or %NULL to ignore
+ *
+ * Create a #GXPSCoreProperties object containing the metadata
+ * of @xpsm, or %NULL in case of error or if the #GXPSFile
+ * doesn't contain core properties.
+ *
+ * Returns: (transfer full): a new #GXPSCoreProperties or %NULL.
+ *    Free the returned object with g_object_unref().
+ */
+GXPSCoreProperties *
+gxps_file_get_core_properties (GXPSFile *xps,
+                               GError  **error)
+{
+        g_return_val_if_fail (GXPS_IS_FILE (xps), NULL);
+
+        if (!xps->priv->core_props)
+                return NULL;
+
+        return _gxps_core_properties_new (xps->priv->zip,
+                                          xps->priv->core_props,
+                                          error);
+}

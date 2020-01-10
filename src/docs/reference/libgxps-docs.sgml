@@ -18,6 +18,7 @@
     <xi:include href="xml/gxps-page.xml"/>
     <xi:include href="xml/gxps-links.xml"/>
     <xi:include href="xml/gxps-document-structure.xml"/>
+    <xi:include href="xml/gxps-core-properties.xml"/>
     <xi:include href="xml/gxps-error.xml"/>
     <xi:include href="xml/gxps-version.xml"/>
   </chapter>
@@ -30,6 +31,11 @@
   <index id="api-index-0-2-1" role="0.2.1">
     <title>Index of new symbols in 0.2.1</title>
     <xi:include href="xml/api-index-0.2.1.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <index id="api-index-0-2-3" role="0.2.3">
+    <title>Index of new symbols in 0.2.3</title>
+    <xi:include href="xml/api-index-0.2.3.xml"><xi:fallback /></xi:include>
   </index>
 
   <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>

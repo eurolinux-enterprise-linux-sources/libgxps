@@ -17,16 +17,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <glib.h>
+#include <locale.h>
 #include G_STRINGIFY(CONVERTER_HEADER)
 
 gint main (gint argc, gchar **argv)
 {
         GXPSConverter *converter;
 
-        g_type_init ();
+        setlocale (LC_ALL, "");
 
         converter = GXPS_CONVERTER (g_object_new (CONVERTER_TYPE, NULL));
 

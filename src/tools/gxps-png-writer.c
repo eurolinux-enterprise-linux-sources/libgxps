@@ -17,11 +17,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include "gxps-png-writer.h"
 #include <png.h>
 #include <stdint.h>
+#include <string.h>
 
 /* starting with libpng15, png.h no longer #includes zlib.h */
 #ifndef Z_BEST_COMPRESSION

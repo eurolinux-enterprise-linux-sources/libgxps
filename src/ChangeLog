@@ -1,6 +1,1129 @@
+commit c201fa6d896c26691ed43967b2c20f6c8229802d
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:   2017-01-29
+
+    parse-utils: instead of using GFile use paths and canonalize them
+
+    This takes the method from glib to canonalize the paths just
+    that instead of using G_DIR_SEPARATOR it always uses / since
+    we want / for all the platforms.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=777894
+
+M	libgxps/gxps-parse-utils.c
+
+commit 6dd9b795bb2807d9b2024ac97f72407c545b5510
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2017-01-29
+
+    Revert "parse-utils: avoid mixing files with paths"
+
+    This reverts commit 8f04b292c0e551e2ba8dba2c77012699e40685c7. It broke
+    structure paths containig '..'.
+
+M	libgxps/gxps-parse-utils.c
+
+commit c2cdd0f529d7fb375e78494ebd83bd8808331a30
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2017-01-29
+
+    document-structure: Add an assert to ensure node->parent is never NULL
+
+    It should never be NULL at that point.
+
+M	libgxps/gxps-document-structure.c
+
+commit d1272be845d7b9739f7118675d792a66bf8b5504
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-08
+
+    path: avoid set but not used warnings
+
+    These variables are only used in debug
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	libgxps/gxps-path.c
+
+commit 7e3bff93b880a420a3d96dd7272512a8ab547013
+Author: Philip Withnall <withnall@endlessm.com>
+Date:	2016-12-20
+
+    lib: Fix potential NULL pointer dereference
+
+    utf8 is dereferenced earlier in the function than the NULL check, so
+    if it is NULL, this will crash. Move the length calculation lower down
+    to avoid this.
+
+    Coverity ID: 1391238
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=776323
+
+M	libgxps/gxps-glyphs.c
+
+commit 2cee4004f969683f3df9d102d9f47e376dd59c8a
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2017-01-28
+
+    archive: another g_clear_pointer
+
+M	libgxps/gxps-archive.c
+
+commit cc8b43990d7cce2a58d5bf2818db701d2f284442
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2017-01-28
+
+    Do not export methods that are supposed to be private
+
+    At some point when I added the export flag to the methods I
+    wanted to match what the regex was exporting, though these
+    methods are private and I think we can safely stop exporting
+    them since I hope evince is not actually using them.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=777865
+
+M	libgxps/Makefile.am
+M	libgxps/gxps-archive.h
+M	libgxps/gxps-brush.h
+M	libgxps/gxps-color.h
+M	libgxps/gxps-fonts.h
+M	libgxps/gxps-glyphs.h
+M	libgxps/gxps-images.h
+M	libgxps/gxps-matrix.h
+M	libgxps/gxps-page-private.h
+M	libgxps/gxps-parse-utils.h
+M	libgxps/gxps-path.h
+
+commit e5655e01d519367a1d698f2d360b6ba34d8326a7
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-27
+
+    Use g_clear_object/pointer where possible
+
+    Since now we depend on an newly enough glib we can make usage
+    of the methods those methods.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=777851
+
+M	libgxps/gxps-archive.c
+M	libgxps/gxps-core-properties.c
+M	libgxps/gxps-document-structure.c
+M	libgxps/gxps-document.c
+M	libgxps/gxps-file.c
+M	libgxps/gxps-page.c
+M	libgxps/gxps-parse-utils.c
+M	tools/gxps-converter.c
+M	tools/gxps-image-converter.c
+
+commit 4a960bc1e66557b5583a8183dd68a603b6e4502d
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-27
+
+    archive: interleaved paths must be always using / separators
+
+    We must ensure the paths are separated using / otherwise in
+    platforms like Windows we would endup with \ separators which clearly
+    do not point to any file.
+
+M	libgxps/gxps-archive.c
+
+commit 8c707929bf5e58b82cda2e545d9e0c4a74525fc0
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-17
+
+    nmake: fix mistake when generating the object list
+
+M	nmake/create-lists-msvc.mak
+
+commit da9fc1c4c46f811588619b51ef3f5f598c0ca772
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-16
+
+    images: use the right return type
+
+M	libgxps/gxps-images.c
+
+commit ad8b2c494dea4c7e3dbc03de9eed6e57e36c151f
+Author: Paolo Borelli <pborelli@gnome.org>
+Date:	2017-01-17
+
+    document-structure: plug small memory leak
+
+M	libgxps/gxps-document-structure.c
+
+commit fe2425e38cbb01f01dcbf2095a3e582947d37003
+Author: Paolo Borelli <pborelli@gnome.org>
+Date:	2017-01-17
+
+    archive: do not leak the stream
+
+M	libgxps/gxps-archive.c
+
+commit b93514d62fb5fcc657a2e890054986731d1c28b7
+Author: Paolo Borelli <pborelli@gnome.org>
+Date:	2017-01-17
+
+    print-converter: fix invalid memory access
+
+    "ext" is a pointer inside basename_lower, so we must free only
+    once we are done using it.
+
+M	tools/gxps-print-converter.c
+
+commit e44399ebdd1424087acc3a2e9253616ae582dd89
+Author: Ignacio Casal Quinteiro <icq@gnome.org>
+Date:	2017-01-17
+
+    archive: use __LA_* types from libarchive
+
+    These defines are available also in libarchive 3.1 (which is the
+    version present in the latest Ubuntu LTS).
+
+M	libgxps/gxps-archive.c
+
+commit 9c9ccea6dc9bf49225cee5c3cfd84c8c55bacfba
+Author: Ignacio Casal Quinteiro <icq@gnome.org>
+Date:	2017-01-17
+
+    tools: fix typo in Makefile.am
+
+M	tools/Makefile.am
+
+commit 99e57d09242a65826fcf7ec1c65aa4be7b2bf717
+Author: Paolo Borelli <pborelli@gnome.org>
+Date:	2017-01-17
+
+    archive: fix indentation in the previous patch
+
+M	libgxps/gxps-archive.c
+
+commit 84e11c4f93829a762273b7cc362d6bc9a7582ed7
+Author: Paolo Borelli <pborelli@gnome.org>
+Date:	2017-01-15
+
+    archive: use GHashTable for the entries
+
+    We only use entries as a set to check if a specific entry is present.
+    Using GHashTable is simpler and avoids walking the list each time.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=777272
+
+M	libgxps/gxps-archive.c
+
+commit 6cfdc25d5e82f42d3ffbf2ad4a1fcf59f6ed55b8
+Author: Paolo Borelli <pborelli@gnome.org>
+Date:	2017-01-15
+
+    gxps-file: use GPtrArray for the docs in an archive
+
+    The API exposes get_n and get_nth so using an array internally
+    is simpler and more efficient.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=777269
+
+M	libgxps/gxps-file.c
+
+commit 8f04b292c0e551e2ba8dba2c77012699e40685c7
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-09
+
+    parse-utils: avoid mixing files with paths
+
+    When getting the relative path we should not try to use GFile
+    since this will convert internally the paths from / to \ instead
+    we should deal with paths directly so the paths do not get
+    mixed up on Windows.
+
+M	libgxps/gxps-parse-utils.c
+
+commit cf8fef812409ab152e332e3ba5630f73c80a5a96
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-09
+
+    images: check the extension in lower case
+
+M	libgxps/gxps-images.c
+
+commit fb393f754f2398a87933de20d659f812a9d580dc
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-08
+
+    nmake: add support to build with libjpeg
+
+M	nmake/config-msvc.mak
+
+commit 3f1d00d07b6ecb6072a309947aa877c11705223f
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-04
+
+    nmake: build xpstopdf tool
+
+M	nmake/Makefile.vc
+M	nmake/build-rules-msvc.mak
+M	nmake/config-msvc.mak
+M	nmake/create-lists-msvc.mak
+M	nmake/generate-msvc.mak
+M	nmake/info-msvc.mak
+M	nmake/install.mak
+M	tools/Makefile.am
+A	tools/Makefile.sources
+
+commit b82e9dbe95e307fb9483bdeaba88fddf695b8ee6
+Author: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date:	2017-01-04
+
+    Declare variables at the top of the block
+
+    This fixes the build with old version of visual studio
+
+M	libgxps/gxps-page.c
+M	libgxps/gxps-path.c
+
+commit b8d9bf2735861e4577a07c0da4acdab466cf99c1
+Author: Philip Withnall <withnall@endlessm.com>
+Date:	2016-12-20
+
+    lib: Ignore a warning about a deprecated libarchive function
+
+    archive_read_finish() is deprecated in favour of archive_read_free()
+    in
+    libarchive version 3.0; but was not deprecated in version 2.0,
+    which we
+    need to continue to support.
+
+    See http://manpages.org/archive_read_finish/3
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=776323
+
+M	libgxps/gxps-archive.c
+
+commit 54448854ac2b1415331dbf3ce50a15ecacfe2bca
+Author: Philip Withnall <withnall@endlessm.com>
+Date:	2016-12-20
+
+    lib: Document explicit fall-through case in glyph parser
+
+    Make it clear that this is not an accidentally missing break
+    statement.
+
+    Coverity ID: 1391237
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=776323
+
+M	libgxps/gxps-glyphs.c
+
+commit ae5f6a38b48462396bd8635b4bb4158af1b23f6a
+Author: Philip Withnall <withnall@endlessm.com>
+Date:	2016-12-20
+
+    lib: Prevent created property being set when content-type is set
+
+    There was a missing break statement.
+
+    Coverity ID: 1391236
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=776323
+
+M	libgxps/gxps-core-properties.c
+
+commit 86d1e6622fde800e504f25a1773723d6544d0dca
+Author: Philip Withnall <withnall@endlessm.com>
+Date:	2016-12-20
+
+    lib: Fix uninitialised variables
+
+    These could have been used later in the code if the relevant keys were
+    not present in the XPS file to set their values.
+
+    Coverity IDs: 1391239, 1391240
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=776323
+
+M	libgxps/gxps-brush.c
+
+commit ef4da36beb8369376b3cf0d4ca9c463627ffa640
+Author: Jason Crain <jason@inspiresomeone.us>
+Date:	2016-12-05
+
+    Fix capitalization Gxps_CFLAGS -> GXPS_CFLAGS
+
+    Fixes building the introspection files because the right CFLAGS
+    were not
+    being passed to g-ir-scanner.
+
+    Bug #775637
+
+M	libgxps/Makefile.am
+
+commit 72e8737ac64c2f5dda6c0d8acc3bede1334d7e0d
+Author: Ernestas Kulik <ernestask@src.gnome.org>
+Date:	2016-10-01
+
+    debug: include gxps-version.h for GXPS_VAR
+
+    GXPS_VAR is defined in gxps-version.h, which is not being included,
+    resulting in build failure.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=772296
+
+M	libgxps/gxps-debug.h
+
+commit 95decf1ea68b9f532b5a7d618bfc11f75e89be09
+Author: Ernestas Kulik <ernestask@src.gnome.org>
+Date:	2016-10-01
+
+    path: do not return from print_token()
+
+    print_token() should not return a value, but does.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=772296
+
+M	libgxps/gxps-path.c
+
+commit 4709da90210839ca8fdd424caa7be897f3be91bb
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    Add nmake scripts to build with MSVC
+
+    This is the first version of the script that builds only
+    the main code. In upcoming patches I will add support
+    for the conditional libraries.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	Makefile.am
+M	configure.ac
+A	nmake/Makefile.am
+A	nmake/Makefile.vc
+A	nmake/README.txt
+A	nmake/build-rules-msvc.mak
+A	nmake/config-msvc.mak
+A	nmake/create-lists-msvc.mak
+A	nmake/create-lists.bat
+A	nmake/detectenv-msvc.mak
+A	nmake/generate-msvc.mak
+A	nmake/info-msvc.mak
+A	nmake/install.mak
+
+commit 14c3dfd11cb98381547e64ec43193075d8cf4af2
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    Ifdef the config.h include
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	libgxps/gxps-archive.c
+M	libgxps/gxps-brush.c
+M	libgxps/gxps-color.c
+M	libgxps/gxps-core-properties.c
+M	libgxps/gxps-document-structure.c
+M	libgxps/gxps-document.c
+M	libgxps/gxps-error.c
+M	libgxps/gxps-file.c
+M	libgxps/gxps-fonts.c
+M	libgxps/gxps-glyphs.c
+M	libgxps/gxps-images.c
+M	libgxps/gxps-links.c
+M	libgxps/gxps-matrix.c
+M	libgxps/gxps-page.c
+M	libgxps/gxps-parse-utils.c
+M	libgxps/gxps-path.c
+M	tools/gxps-converter-main.c
+M	tools/gxps-converter.c
+M	tools/gxps-image-converter.c
+M	tools/gxps-image-writer.c
+M	tools/gxps-jpeg-converter.c
+M	tools/gxps-jpeg-writer.c
+M	tools/gxps-pdf-converter.c
+M	tools/gxps-png-converter.c
+M	tools/gxps-png-writer.c
+M	tools/gxps-print-converter.c
+M	tools/gxps-ps-converter.c
+M	tools/gxps-svg-converter.c
+
+commit 8874b88b57e784df11a10f47f7262aebda334b44
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    images: tiff and png make use or stdints so include the header
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	libgxps/gxps-images.c
+
+commit fa58bd6a953011b72153a37e2cd470af5375f995
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    Fix useless warnings
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	libgxps/gxps-glyphs.c
+M	libgxps/gxps-path.c
+
+commit fe2951e93325899598160a477ecf038e9c875b76
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    archive: use the right types for the parameters of the callbacks
+
+    This fixes the build on windows.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	libgxps/gxps-archive.c
+
+commit 773a2aca75b424080cff1c4ee27d2be7b3232241
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    autogen: do not use gnome-autogen
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	autogen.sh
+
+commit 4983feaf5fd2bcf100a5be71e52a822646997fa1
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    build: add Makefile.sources providing the lists of sources
+
+    This in preparation so we maintain one single list of sources
+    for the automake Makefile and the Nmake one.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	libgxps/Makefile.am
+A	libgxps/Makefile.sources
+
+commit ac9d66e790d5e6a1cc8de5220b0acc5cf572e564
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    test-gxps: do not use deprecated api
+
+    See that there is no need to bump the gtk3 version since
+    the api that we are using is >= 3.0 which is the version
+    supported by the library.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	test/test-gxps.c
+
+commit 5b55ab12d2b9b9851f77f50c2ce07131c39812ef
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-09
+
+    Bump glib to version 2.36 and avoid the usage of g_type_init
+
+    This method is deprecated since that version.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	configure.ac
+M	tools/gxps-converter-main.c
+
+commit 5ffc348e0750559058c35eba703e027e4ef8d5fb
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-13
+
+    Include the version header using the right path.
+
+    This fixes gnome continuous which uses builddir != srcdir.
+
+M	libgxps/gxps-archive.h
+M	libgxps/gxps-core-properties.h
+M	libgxps/gxps-document.h
+M	libgxps/gxps-error.h
+M	libgxps/gxps-links.h
+M	libgxps/gxps-page.h
+
+commit 92d0f11e36ae6b09307d69b7daa69c121edd924e
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-08
+
+    images: ifdef _jpeg_color_space_name
+
+    This method is only used for debug
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	libgxps/gxps-images.c
+
+commit a2286690acd29df3f59656a176ea8221e68bd748
+Author: Ignacio Casal Quinteiro <ignacio.casal@nice-software.com>
+Date:	2016-09-08
+
+    Add GXPS_AVAILABLE_IN_ALL macro to handle the visibility of the
+    methods
+
+    This is in preparation to add support for Visual studio projects
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=771057
+
+M	configure.ac
+M	libgxps/Makefile.am
+M	libgxps/gxps-archive.h
+M	libgxps/gxps-brush.h
+M	libgxps/gxps-color.h
+M	libgxps/gxps-core-properties.h
+M	libgxps/gxps-debug.h
+M	libgxps/gxps-document-structure.h
+M	libgxps/gxps-document.h
+M	libgxps/gxps-error.h
+M	libgxps/gxps-file.h
+M	libgxps/gxps-fonts.h
+M	libgxps/gxps-glyphs.h
+M	libgxps/gxps-images.h
+M	libgxps/gxps-links.h
+M	libgxps/gxps-matrix.h
+M	libgxps/gxps-page-private.h
+M	libgxps/gxps-page.h
+M	libgxps/gxps-parse-utils.h
+M	libgxps/gxps-path.h
+M	libgxps/gxps-version.h.in
+
+commit a4ef10a552435da24f3ea87126dad96799922fde
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2016-06-20
+
+    release: 0.2.4
+
+M	NEWS
+M	configure.ac
+
+commit 3fb36de95522bf637b238b73f1587dfc5caf9fd7
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:	2016-05-17
+
+    Fix build (with GCC 6?)
+
+    This is a test case, so no reason to worry about format nonliterals.
+    (Are these errors by default now?)
+
+M	test/test-gxps.c
+
+commit ee1c25a031c0963bfd9b2c3223de6394b96a78a9
+Author: Ting-Wei Lan <lantw@src.gnome.org>
+Date:	2016-01-11
+
+    tools: Call setlocale in main function of gxps-converter-main.c
+
+    It is required to correctly show translated messages on some locales.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=760437
+
+M	tools/gxps-converter-main.c
+
+commit 86414c28b633a4e0c729a66c486f523604411035
+Author: Ting-Wei Lan <lantw@src.gnome.org>
+Date:	2016-01-06
+
+    gxps-images: Fix non-literal format string warning for clang
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=760177
+
+M	libgxps/gxps-images.c
+
+commit ce9a91f9208d0e62d7bc290d1f6291a77ca0887e
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-09-04
+
+    release: 0.2.3.2
+
+M	NEWS
+M	configure.ac
+
+commit 407e02691ba3e885f5f0b7e7b4163eb7d6080995
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2015-08-20
+
+    build: link libgxps with -lm
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=753771
+
+M	libgxps/Makefile.am
+
+commit b62ce7ec2845203eedc48347075175584ae364a3
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-08-14
+
+    release: 0.2.3.1
+
+M	NEWS
+M	configure.ac
+
+commit 883b607bf8a06f6e1b84d1c5967a6a90d60470a9
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-08-13
+
+    build: Explicitly link to libpng
+
+    Fix linking errors due to undefined libpng symbols in some cases.
+
+M	libgxps/Makefile.am
+
+commit 4151d837e5e01030f9fed4264a488080c49b94c5
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-08-13
+
+    release: 0.2.3
+
+M	NEWS
+M	configure.ac
+
+commit 3132fbb579fd82c8bb0345ee7281a76383b1b5e0
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-08-13
+
+    docs: Add Since tag to new API
+
+M	docs/reference/libgxps-docs.sgml
+M	libgxps/gxps-core-properties.c
+
+commit 27f1eb511e5967ac2afe0037544c074cd660db41
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2015-05-05
+
+    Fix transformation for VisualBrush elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=742630
+
+M	libgxps/gxps-brush.c
+
+commit e20cd4bb51b8c2c36faf213b2e3c91d6c8434581
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2015-07-27
+
+    Support ImageBrush Viewbox and rotation/shearing matrices
+
+    This modifies ImageBrush handling to support clipping based on the
+    Viewbox and multiplies the transform matrix to support rotation or
+    shearing transformations.
+
+    Viewbox is given in units of 1/96 of an inch, which means it depends
+    on the image resolution.  This modifies image loading (including using
+    libpng instead of cairo) in order to capture the resolution and wraps
+    it in a GXPSImage struct.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=751357
+
+M	configure.ac
+M	libgxps/gxps-brush.c
+M	libgxps/gxps-images.c
+M	libgxps/gxps-images.h
+M	libgxps/gxps-page-private.h
+M	libgxps/gxps-page.c
+
+commit da79d9106d706aeea01db3fb1f32c27e147ba7d4
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Update references also for tests that no longer crash
+
+    We are currently updating the refs only when we have checksums to
+    compare, but if a test used to crash there's no md5 file in refs.
+
+M	regtest/Test.py
+M	regtest/TestRun.py
+
+commit 81f14f5827731fd28a5bae1fa66ab8ec7a0c54ad
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Limit the number of worker threads to the number of documents
+    to test
+
+    We are always spawning all the threads even if the documents to
+    test is
+    less than the worker threads. Also optimize the case of running
+    only one
+    test to not spwn any thread.
+
+M	regtest/TestRun.py
+
+commit ced6651a8ef36f2c1a926879d6e79b262fc6c085
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Return an exist status code depending on whether the
+    command succeeded
+
+M	regtest/TestRun.py
+M	regtest/commands/__init__.py
+M	regtest/commands/create-refs.py
+M	regtest/commands/create-report.py
+M	regtest/commands/run-tests.py
+M	regtest/gxps-regtest
+M	regtest/main.py
+
+commit 6f25bcfa839e664bb37a3922f2efe8f0a54f3219
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Save checksum results sorted in md5 files
+
+    We are using os.listdir() to get the list of test results that returns
+    files in arbitrary order.
+
+M	regtest/Test.py
+
+commit 5832f4d7daeb6fcf4670e0c4de9f1ec45a791ea8
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Show also the tests expected to crash/fail to run but
+    don't fail
+
+M	regtest/TestRun.py
+
+commit 151e161f6823069f1efc027e2acf69d0062d2ece
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Read test results in chunks to get the md5 digest
+
+    Instead of creating the md5 object with the entire file, we feed
+    it with
+    chunks of data using the update method. This improves a lot the memory
+    consumption and performance as well.
+
+M	regtest/Test.py
+
+commit e6f6926e7e114e3854df1a85433b5fc463f944f3
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Do not store the current line in Printer but only its length
+
+    We are not using the line text anymore, but only the length.
+
+M	regtest/Printer.py
+
+commit eafb667804e0e43e2a9ef0dc6dcc4a54a9da33f2
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Do not consider docs with no refs as skipped
+
+    Handle them differently as new docs, and show them in the summary
+    suggesting to use create-refs command to include them in the test
+    suite.
+
+M	regtest/TestRun.py
+
+commit 131d7206987f9c6560e9190c6c528df554578020
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Use number of tests run to show the progress
+
+    Instead of using the number of document tested. We don't really
+    need to
+    set a number to a particular document, we only want to know the
+    progress
+    of the whole process. This ensures that the progress is shown in the
+    correct order. It also simplifies the code a bit. Also improved the
+    output formatting to make it easier to read.
+
+M	regtest/Printer.py
+M	regtest/TestReferences.py
+M	regtest/TestRun.py
+
+commit c5e09a165dd8c0af217ad8931fd07e3e78a389b6
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Print test results when the test has finished
+
+    To make sure the result corresponds to the test now that we are using
+    multiple threads.
+
+M	regtest/Printer.py
+M	regtest/TestRun.py
+
+commit f6234106f61ecfd9845db071b078845423fe9895
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-23
+
+    regtest: Use the number of cpus as default number of worker threads
+
+M	regtest/main.py
+
+commit 41a13771ca76b1ee0b2f036a27de374cd13af0cc
+Author: Adam Reichold <adamreichold@myopera.com>
+Date:	2015-06-23
+
+    regtest: implement parallel testing using Python's Queue class
+
+M	regtest/Printer.py
+M	regtest/Test.py
+M	regtest/TestReferences.py
+M	regtest/TestRun.py
+M	regtest/main.py
+
+commit dea3ff240e8c609bec2c2a9790168ea7be47f164
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-06-04
+
+    gxps-brush: Fix scale of ImageBrush elements
+
+    We were not taking into account the size of the original image.
+
+M	libgxps/gxps-brush.c
+
+commit d94f36d4d2256aafa0ad7f032538b68eb18e1605
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-02-15
+
+    gxps-images: Add support for JPEG images with GRAYSCALE color space
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=744120
+
+M	libgxps/gxps-images.c
+
+commit e28a6c62a01ee89a4609515cb7dec5c80144ab03
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2015-02-15
+
+    regtest: Fix png diff generation with python-pil pillow fork
+
+    Use from PIL import Image instead of just import Image, since pillow
+    only doesn't support import Image without using PIL.Image.
+
+M	regtest/Test.py
+
+commit b70d5077cf8a3a5a732d4c0da075f51d3d32048f
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2014-08-01
+
+    doap: add <programming-language>
+
+M	libgxps.doap
+
+commit a562dc231737b9ab18bb1ec560a8a11bd59a3ed8
+Author: Olav Vitters <olav@vitters.nl>
+Date:	2014-07-30
+
+    doap category core
+
+M	libgxps.doap
+
+commit a69f9be76536d1ffc28dd548f4db228e2d382174
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2013-11-26
+
+    gxps-page: Use gxps_value_get_double_non_negative to parse dash
+    array values
+
+    Dash array values can't be negative. Spotted by Lukas Lueg.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=715023
+
+M	libgxps/gxps-page.c
+
+commit b011d90cb202cfd1be99cb3e496f82b1b1833c49
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2013-11-26
+
+    utils: Add gxps_value_get_double_non_negative()
+
+    To parse non negative doubles.
+
+M	libgxps/gxps-parse-utils.c
+M	libgxps/gxps-parse-utils.h
+
+commit 189336ef928ba7bf9a70562fca18e5a61144814a
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2013-11-26
+
+    gxps-page: Make gxps_dash_array_parse fail for an odd number of dashes
+
+    Spotted by Lukas Lueg.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=715023
+
+M	libgxps/gxps-page.c
+
+commit 95c165c2161ed30b1a5ac53b62980f76909dcc6d
+Author: Lukas Lueg <lukas.lueg@gmail.com>
+Date:	2013-11-26
+
+    gxps-page: Fix parsing of dash array when it has trailing or leading
+    whitespaces
+
+    Strip the string before splitting it.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=715023
+
+M	libgxps/gxps-page.c
+
+commit adbfe0eae9396769d64e050651754ac2a08bd457
+Author: Juanjo Marín <juanj.marin@juntadeandalucia.es>
+Date:	2013-04-18
+
+    Cleanup: remove unused variable
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=698022
+
+M	libgxps/gxps-archive.c
+
+commit d916eddcc321f6072a64e8a7618bf0f1d4e51d04
+Author: Juanjo Marín <juanj.marin@juntadeandalucia.es>
+Date:	2013-04-18
+
+    Cleanup: remove GXPSArchiveEntry
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=698022
+
+M	libgxps/gxps-archive.c
+M	libgxps/gxps-archive.h
+
+commit d469b385f7c91b41e51a7a274926e14e9c2963be
+Author: Petr Gajdos <pgajdos@suse.cz>
+Date:	2013-02-18
+
+    Fix the build with libpng16
+
+    Include string.h explicitly in gxps-png-writer.c since png.h no longer
+    includes it.
+
+M	tools/gxps-png-writer.c
+
+commit 043c517063f0639b18473fefec9a8fd5df515f7d
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2013-01-11
+
+    test-gxps: Add a button to the toolbar to show a core properties
+    window
+
+M	configure.ac
+M	test/test-gxps.c
+
+commit 3c5063e8909bcc96d75969dd5d4a4fbc5c6e129c
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2013-01-11
+
+    Add API to get Core Propoerties of a XPS file
+
+M	TODO
+M	docs/reference/libgxps-docs.sgml
+M	docs/reference/libgxps-sections.txt
+M	docs/reference/libgxps.types
+M	libgxps/Makefile.am
+A	libgxps/gxps-core-properties.c
+A	libgxps/gxps-core-properties.h
+M	libgxps/gxps-file.c
+M	libgxps/gxps-file.h
+M	libgxps/gxps-private.h
+
+commit 9ae0299eb47412d50a249b3d53730571b4a8e22f
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2013-01-11
+
+    Fix parsing of real numbers containing e[+-]number
+
+M	libgxps/gxps-glyphs.c
+M	libgxps/gxps-parse-utils.c
+M	libgxps/gxps-parse-utils.h
+M	libgxps/gxps-path.c
+
+commit bb7ddf8d9bfc6cd946d1db0a8a1aebd08a7c459e
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-12-21
+
+    Add support for interleaved archives
+
+M	libgxps/gxps-archive.c
+
+commit cc7571f8f20805ca7314149a7d9fd15a1f3d0bae
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-12-21
+
+    Add gxps_zip_archive_iter_next()
+
+    Helper function to make it easier to iterate the archive and reduces
+    some duplicated code.
+
+M	libgxps/gxps-archive.c
+
+commit ed45f6093a8375d3d7d2d7dfab6c4a8a7ca91031
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-12-21
+
+    Add helper function to check if a given path is part of the archive
+
+M	libgxps/gxps-archive.c
+
+commit a5db4274385b840ee7626e4b84fb945cbf44a989
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-11-03
+
+    gxps-document: Fix a crash in documents containing nested
+    FixedDocument
+
+    It's a bug in the document itself, but we shouldn't crash anyway.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=685741
+
+M	libgxps/gxps-document.c
+
+commit bc5571f48b3f360c59c6bf2d47f48523a4f21d48
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-10-21
+
+    regtest: Reduce the noise of the default output when running tests
+
+    Show permanent information only about failed tests, without the
+    details
+    about the failing pages. Previous verbose output is available passing
+    --verbose command line output.
+
+A	regtest/Printer.py
+M	regtest/Test.py
+M	regtest/TestReferences.py
+M	regtest/TestRun.py
+M	regtest/commands/create-refs.py
+M	regtest/commands/run-tests.py
+M	regtest/main.py
+
+commit 40b1f348e47f18cf1d44eedc4b44222aba8dbc93
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-10-21
+
+    regtest: Add create-report command to generate html report of
+    test results
+
+A	regtest/HTMLReport.py
+M	regtest/Test.py
+A	regtest/commands/create-report.py
+
+commit b8cc77acd5846eafc71f0344333a39881aa6e8d0
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-10-21
+
+    regtest: Use diff.png extension for image diff files
+
+    So that they are recognized as images
+
+M	regtest/Test.py
+
+commit 41bd295f8560c43879d28fcbeb3818e54ac311e0
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-03-19
+
+    release: 0.2.2
+
+M	NEWS
+M	configure.ac
+
 commit ebf3cf7aa81c03458bf695bf0d6d1c0d4361802a
 Author: Carlos Garcia Campos <carlosgc@gnome.org>
-Date:   2012-03-10
+Date:	2012-03-10
 
     Update COPYING to lgpg2.1 to match source file headers
 

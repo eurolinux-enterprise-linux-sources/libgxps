@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <string.h>
 
@@ -97,6 +99,8 @@ path_data_token_type_to_string (PathDataTokenType type)
         default:
                 g_assert_not_reached ();
         }
+
+        return NULL;
 }
 
 #ifdef GXPS_ENABLE_DEBUG
@@ -173,9 +177,7 @@ path_data_iter_next (PathDataToken *token,
                 gchar *str;
 
                 start = token->iter;
-                token->iter++;
-                while (token->iter != token->end && (g_ascii_isdigit (*token->iter) || *token->iter == '.'))
-                        token->iter++;
+                gxps_parse_skip_number (&token->iter, token->end);
                 str = g_strndup (start, token->iter - start);
                 if (!gxps_value_get_double (str, &token->number)) {
                         g_set_error (error,
@@ -478,7 +480,13 @@ gxps_path_parse (const gchar *data,
                         is_rel = TRUE;
                 case 'A':
                         while (token.type == PD_TOKEN_NUMBER) {
-                                gdouble xr, yr, rx, farc, fsweep, x, y;
+                                gdouble xr, yr, x, y;
+#ifdef GXPS_ENABLE_DEBUG
+                                /* TODO: for now these variables are only used
+                                 * in debug mode.
+                                 */
+                                gdouble rx, farc, fsweep;
+#endif
 
                                 if (!path_data_get_point (&token, &xr, &yr, error))
                                         return FALSE;
@@ -489,7 +497,9 @@ gxps_path_parse (const gchar *data,
                                         path_data_parse_error (&token, PD_TOKEN_NUMBER, error);
                                         return FALSE;
                                 }
+#ifdef GXPS_ENABLE_DEBUG
                                 rx = token.number;
+#endif
 
                                 if (!path_data_iter_next (&token, error))
                                         return FALSE;
@@ -497,7 +507,9 @@ gxps_path_parse (const gchar *data,
                                         path_data_parse_error (&token, PD_TOKEN_NUMBER, error);
                                         return FALSE;
                                 }
+#ifdef GXPS_ENABLE_DEBUG
                                 farc = token.number;
+#endif
 
                                 if (!path_data_iter_next (&token, error))
                                         return FALSE;
@@ -505,7 +517,9 @@ gxps_path_parse (const gchar *data,
                                         path_data_parse_error (&token, PD_TOKEN_NUMBER, error);
                                         return FALSE;
                                 }
+#ifdef GXPS_ENABLE_DEBUG
                                 fsweep = token.number;
+#endif
 
                                 if (!path_data_iter_next (&token, error))
                                         return FALSE;
@@ -877,12 +891,14 @@ path_geometry_end_element (GMarkupParseContext  *context,
 
 		if (path->opacity_mask) {
 			gdouble x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+			cairo_path_t *cairo_path;
+
 			if (path->stroke_pattern)
 				cairo_stroke_extents (path->ctx->cr, &x1, &y1, &x2, &y2);
 			else if (path->fill_pattern)
 				cairo_fill_extents (path->ctx->cr, &x1, &y1, &x2, &y2);
 
-			cairo_path_t *cairo_path = cairo_copy_path (path->ctx->cr);
+			cairo_path = cairo_copy_path (path->ctx->cr);
 			cairo_new_path (path->ctx->cr);
 			cairo_rectangle (path->ctx->cr, x1, y1, x2 - x1, y2 - y1);
 			cairo_clip (path->ctx->cr);

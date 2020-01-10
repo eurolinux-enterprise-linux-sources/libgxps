@@ -4,9 +4,10 @@
 
 m4_define([gxps_major_version],[0])
 m4_define([gxps_minor_version],[2])
-m4_define([gxps_micro_version],[2])
+m4_define([gxps_micro_version],[5])
 m4_define([gxps_extra_version],[])
 m4_define([gxps_version],[gxps_major_version.gxps_minor_version.gxps_micro_version()gxps_extra_version])
+
 
 # Libtool versioning. The backend and view libraries have separate versions.
 # Before making a release, the libtool version should be modified.
@@ -18,9 +19,9 @@ m4_define([gxps_version],[gxps_major_version.gxps_minor_version.gxps_micro_versi
 # - If the interface is the same as the previous version, change to C:R+1:A
 
 # Libtool version
-m4_define([gxps_lt_current],[3])
+m4_define([gxps_lt_current],[4])
 m4_define([gxps_lt_revision],[1])
-m4_define([gxps_lt_age],[1])
+m4_define([gxps_lt_age],[2])
 m4_define([gxps_lt_version_info],[gxps_lt_current:gxps_lt_revision:gxps_lt_age])
 m4_define([gxps_lt_current_minus_age],[m4_eval(gxps_lt_current - gxps_lt_age)])
 
@@ -64,7 +65,7 @@ fi
 AC_SUBST(GXPS_DEBUG_CFLAGS)
 
 dnl Specify required versions of dependencies
-GLIB_REQUIRED=2.24
+GLIB_REQUIRED=2.36
 CAIRO_REQUIRED=1.10.0
 LIBARCHIVE_REQUIRED=2.8.0
 
@@ -81,6 +82,8 @@ AC_SUBST(GXPS_LIBS)
 AC_SUBST(GLIB_REQUIRED)
 AC_SUBST(CAIRO_REQUIRED)
 AC_SUBST(LIBARCHIVE_REQUIRED)
+
+AC_CHECK_FUNC(localtime_r, AC_DEFINE(HAVE_LOCALTIME_R, 1, [Defines if localtime_r is available on your system]))
 
 dnl libjpeg
 AC_ARG_WITH(libjpeg,
@@ -183,6 +186,9 @@ dnl libpng
 PKG_CHECK_MODULES(LIBPNG, libpng, [have_libpng="yes"], [have_libpng="no"])
 
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xyes)
+if test x$have_libpng = xyes; then
+   AC_DEFINE(HAVE_LIBPNG, [1], [Have PNG library])
+fi
 
 AC_SUBST(LIBPNG_CFLAGS)
 AC_SUBST(LIBPNG_LIBS)
@@ -236,6 +242,39 @@ AC_SUBST([GXPS_MICRO_VERSION],[gxps_micro_version])
 AC_SUBST([GXPS_LT_VERSION_INFO],[gxps_lt_version_info])
 AC_SUBST([GXPS_LT_CURRENT_MINUS_AGE],[gxps_lt_current_minus_age])
 
+##################################################
+# Visibility handling
+##################################################
+
+GXPS_HIDDEN_VISIBILITY_CFLAGS=""
+case "$host" in
+    *-*-mingw*)
+        dnl on mingw32 we do -fvisibility=hidden and __declspec(dllexport)
+        AC_DEFINE([_GXPS_EXTERN], [__attribute__((visibility("default"))) __declspec(dllexport) extern],
+                  [defines how to decorate public symbols while building])
+        GXPS_HIDDEN_VISIBILITY_CFLAGS="-fvisibility=hidden"
+        ;;
+    *)
+        dnl on other compilers, check if we can do -fvisibility=hidden
+        SAVED_CFLAGS="${CFLAGS}"
+        CFLAGS="-fvisibility=hidden"
+        AC_MSG_CHECKING([for -fvisibility=hidden compiler flag])
+        AC_TRY_COMPILE([], [int main (void) { return 0; }],
+                       AC_MSG_RESULT(yes)
+                       enable_fvisibility_hidden=yes,
+                       AC_MSG_RESULT(no)
+                       enable_fvisibility_hidden=no)
+        CFLAGS="${SAVED_CFLAGS}"
+
+        AS_IF([test "${enable_fvisibility_hidden}" = "yes"], [
+            AC_DEFINE([_GXPS_EXTERN], [__attribute__((visibility("default"))) extern],
+                      [defines how to decorate public symbols while building])
+            GXPS_HIDDEN_VISIBILITY_CFLAGS="-fvisibility=hidden"
+        ])
+        ;;
+esac
+AC_SUBST(GXPS_HIDDEN_VISIBILITY_CFLAGS)
+
 # *****************************************************************************
 # *****************************************************************************
 
@@ -250,6 +289,7 @@ docs/Makefile
 docs/reference/Makefile
 docs/reference/version.xml
 docs/tools/Makefile
+nmake/Makefile
 ])
 
 AC_OUTPUT

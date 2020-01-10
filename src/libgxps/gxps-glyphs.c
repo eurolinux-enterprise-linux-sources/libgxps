@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <string.h>
 
@@ -106,6 +108,8 @@ glyphs_indices_token_type_to_string (GlyphsIndicesTokenType type)
         default:
                 g_assert_not_reached ();
         }
+
+        return NULL;
 }
 
 static gboolean
@@ -127,9 +131,7 @@ glyphs_indices_iter_next (GlyphsIndicesToken *token,
                 gchar *str;
 
                 start = token->iter;
-                token->iter++;
-                while (token->iter != token->end && (g_ascii_isdigit (*token->iter) || *token->iter == '.'))
-                        token->iter++;
+                gxps_parse_skip_number (&token->iter, token->end);
                 str = g_strndup (start, token->iter - start);
                 if (!gxps_value_get_double (str, &token->number)) {
                         g_set_error (error,
@@ -197,7 +199,6 @@ glyphs_lookup_index (cairo_scaled_font_t *scaled_font,
         cairo_glyph_t stack_glyphs[1];
         cairo_glyph_t *glyphs = stack_glyphs;
         int num_glyphs = 1;
-        int utf8_len = g_utf8_next_char (utf8) - utf8;
         gulong index = 0;
 
         if (utf8 == NULL || *utf8 == '\0')
@@ -205,7 +206,8 @@ glyphs_lookup_index (cairo_scaled_font_t *scaled_font,
 
         status = cairo_scaled_font_text_to_glyphs (scaled_font,
                                                    0, 0,
-                                                   utf8, utf8_len,
+                                                   utf8,
+                                                   g_utf8_next_char (utf8) - utf8,
                                                    &glyphs, &num_glyphs,
                                                    NULL, NULL, NULL);
 
@@ -364,6 +366,7 @@ glyphs_indices_parse (const char          *indices,
                         break;
                 case GI_TOKEN_EOF:
                         eof = TRUE;
+                        /* fall through */
                 case GI_TOKEN_SEMICOLON: {
                         cairo_text_extents_t extents;
 

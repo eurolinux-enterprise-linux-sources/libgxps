@@ -18,7 +18,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <string.h>
 #include <archive_entry.h>
@@ -33,10 +35,10 @@ enum {
 struct _GXPSArchive {
 	GObject parent;
 
-	gboolean  initialized;
-	GError   *init_error;
-	GFile    *filename;
-	GList    *entries;
+	gboolean    initialized;
+	GError     *init_error;
+	GFile      *filename;
+	GHashTable *entries;
 };
 
 struct _GXPSArchiveClass {
@@ -59,11 +61,6 @@ typedef struct {
 	GError           *error;
 } ZipArchive;
 
-struct _GXPSArchiveEntry {
-	ZipArchive           *zip;
-	struct archive_entry *entry;
-};
-
 static int
 _archive_open (struct archive *archive,
 	       void           *data)
@@ -75,7 +72,7 @@ _archive_open (struct archive *archive,
 	return (zip->error) ? ARCHIVE_FATAL : ARCHIVE_OK;
 }
 
-static ssize_t
+static __LA_SSIZE_T
 _archive_read (struct archive *archive,
 	       void           *data,
 	       const void    **buffer)
@@ -92,10 +89,10 @@ _archive_read (struct archive *archive,
 	return read_bytes;
 }
 
-static off_t
+static __LA_INT64_T
 _archive_skip (struct archive *archive,
 	       void           *data,
-	       off_t           request)
+	       __LA_INT64_T    request)
 {
 	ZipArchive *zip = (ZipArchive *)data;
 
@@ -122,9 +119,7 @@ _archive_close (struct archive *archive,
 {
 	ZipArchive *zip = (ZipArchive *)data;
 
-	if (zip->stream)
-		g_object_unref (zip->stream);
-	zip->stream = NULL;
+	g_clear_object (&zip->stream);
 
 	return ARCHIVE_OK;
 }
@@ -147,10 +142,35 @@ gxps_zip_archive_create (GFile *filename)
 	return zip;
 }
 
+static gboolean
+gxps_zip_archive_iter_next (ZipArchive            *zip,
+                            struct archive_entry **entry)
+{
+        int result;
+
+        result = archive_read_next_header (zip->archive, entry);
+        if (result >= ARCHIVE_WARN && result <= ARCHIVE_OK) {
+                if (result < ARCHIVE_OK) {
+                        g_warning ("Error: %s\n", archive_error_string (zip->archive));
+                        archive_set_error (zip->archive, ARCHIVE_OK, "No error");
+                        archive_clear_error (zip->archive);
+                }
+
+                return TRUE;
+        }
+
+        return result != ARCHIVE_FATAL && result != ARCHIVE_EOF;
+}
+
 static void
 gxps_zip_archive_destroy (ZipArchive *zip)
 {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+	/* This is a deprecated synonym for archive_read_free() in libarchive
+	 * 3.0; but is not deprecated in libarchive 2.0, which we continue to
+	 * support. */
 	archive_read_finish (zip->archive);
+G_GNUC_END_IGNORE_DEPRECATIONS
 	g_slice_free (ZipArchive, zip);
 }
 
@@ -159,26 +179,37 @@ gxps_archive_finalize (GObject *object)
 {
 	GXPSArchive *archive = GXPS_ARCHIVE (object);
 
-	if (archive->entries) {
-		g_list_foreach (archive->entries, (GFunc)g_free, NULL);
-		g_list_free (archive->entries);
-		archive->entries = NULL;
-	}
-
-	if (archive->filename) {
-		g_object_unref (archive->filename);
-		archive->filename = NULL;
-	}
-
+	g_clear_pointer (&archive->entries, g_hash_table_unref);
+	g_clear_object (&archive->filename);
 	g_clear_error (&archive->init_error);
 
 	G_OBJECT_CLASS (gxps_archive_parent_class)->finalize (object);
 }
 
+static guint
+caseless_hash (gconstpointer v)
+{
+	gchar *lower;
+	guint ret;
+
+	lower = g_ascii_strdown (v, -1);
+	ret = g_str_hash (lower);
+	g_free (lower);
+
+	return ret;
+}
+
+static gboolean
+caseless_equal (gconstpointer v1,
+                gconstpointer v2)
+{
+	return g_ascii_strcasecmp (v1, v2) == 0;
+}
+
 static void
 gxps_archive_init (GXPSArchive *archive)
 {
-
+	archive->entries = g_hash_table_new_full (caseless_hash, caseless_equal, g_free, NULL);
 }
 
 static void
@@ -225,7 +256,6 @@ gxps_archive_initable_init (GInitable     *initable,
 	GXPSArchive          *archive;
 	ZipArchive           *zip;
 	struct archive_entry *entry;
-	gint                  result;
 
 	archive = GXPS_ARCHIVE (initable);
 
@@ -248,20 +278,11 @@ gxps_archive_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
-	do {
-		result = archive_read_next_header (zip->archive, &entry);
-		if (result >= ARCHIVE_WARN && result <= ARCHIVE_OK) {
-			if (result < ARCHIVE_OK) {
-				g_print ("Error: %s\n", archive_error_string (zip->archive));
-				archive_set_error (zip->archive, ARCHIVE_OK, "No error");
-				archive_clear_error (zip->archive);
-			}
-			/* FIXME: We can ignore directories here */
-			archive->entries = g_list_prepend (archive->entries,
-							   g_strdup (archive_entry_pathname (entry)));
-			archive_read_data_skip (zip->archive);
-		}
-	} while (result != ARCHIVE_FATAL && result != ARCHIVE_EOF);
+        while (gxps_zip_archive_iter_next (zip, &entry)) {
+                /* FIXME: We can ignore directories here */
+                g_hash_table_add (archive->entries, g_strdup (archive_entry_pathname (entry)));
+                archive_read_data_skip (zip->archive);
+        }
 
 	gxps_zip_archive_destroy (zip);
 
@@ -288,10 +309,13 @@ gboolean
 gxps_archive_has_entry (GXPSArchive *archive,
 			const gchar *path)
 {
-	if (path && path[0] == '/')
+	if (path == NULL)
+		return FALSE;
+
+	if (path[0] == '/')
 		path++;
 
-	return g_list_find_custom (archive->entries, path, (GCompareFunc)g_ascii_strcasecmp) != NULL;
+	return g_hash_table_contains (archive->entries, path);
 }
 
 /* GXPSArchiveInputStream */
@@ -299,6 +323,8 @@ typedef struct _GXPSArchiveInputStream {
 	GInputStream          parent;
 
 	ZipArchive           *zip;
+        gboolean              is_interleaved;
+        guint                 piece;
 	struct archive_entry *entry;
 } GXPSArchiveInputStream;
 
@@ -318,30 +344,35 @@ gxps_archive_open (GXPSArchive *archive,
 		   const gchar *path)
 {
 	GXPSArchiveInputStream *stream;
-	gint                    result;
+	gchar                  *first_piece_path = NULL;
 
-	if (path && path[0] == '/')
-		path++;
-
-	if (!g_list_find_custom (archive->entries, path, (GCompareFunc)g_ascii_strcasecmp))
+	if (path == NULL)
 		return NULL;
 
-	stream = (GXPSArchiveInputStream *)g_object_new (GXPS_TYPE_ARCHIVE_INPUT_STREAM, NULL);
+	if (path[0] == '/')
+		path++;
 
+	if (!g_hash_table_contains (archive->entries, path)) {
+                first_piece_path = g_build_path ("/", path, "[0].piece", NULL);
+                if (!g_hash_table_contains (archive->entries, first_piece_path)) {
+                        g_free (first_piece_path);
+
+                        return NULL;
+                }
+                path = first_piece_path;
+        }
+
+	stream = (GXPSArchiveInputStream *)g_object_new (GXPS_TYPE_ARCHIVE_INPUT_STREAM, NULL);
 	stream->zip = gxps_zip_archive_create (archive->filename);
-	do {
-		result = archive_read_next_header (stream->zip->archive, &stream->entry);
-		if (result >= ARCHIVE_WARN && result <= ARCHIVE_OK) {
-			if (result < ARCHIVE_OK) {
-				g_print ("Error: %s\n", archive_error_string (stream->zip->archive));
-				archive_set_error (stream->zip->archive, ARCHIVE_OK, "No error");
-				archive_clear_error (stream->zip->archive);
-			}
-			if (g_ascii_strcasecmp (path, archive_entry_pathname (stream->entry)) == 0)
-				break;
-			archive_read_data_skip (stream->zip->archive);
-		}
-	} while (result != ARCHIVE_FATAL && result != ARCHIVE_EOF);
+        stream->is_interleaved = first_piece_path != NULL;
+
+        while (gxps_zip_archive_iter_next (stream->zip, &stream->entry)) {
+                if (g_ascii_strcasecmp (path, archive_entry_pathname (stream->entry)) == 0)
+                        break;
+                archive_read_data_skip (stream->zip->archive);
+        }
+
+        g_free (first_piece_path);
 
 	return G_INPUT_STREAM (stream);
 }
@@ -390,10 +421,11 @@ gxps_archive_read_entry (GXPSArchive *archive,
 			*bytes_read += bytes;
 		} while (bytes > 0);
 
+		g_object_unref (stream);
+
 		if (*bytes_read == 0) {
 			/* TODO: Error */
 			g_free (*buffer);
-			g_object_unref (stream);
 			return FALSE;
 		}
 
@@ -413,6 +445,43 @@ gxps_archive_read_entry (GXPSArchive *archive,
 	return retval;
 }
 
+static gboolean
+gxps_archive_input_stream_is_last_piece (GXPSArchiveInputStream *stream)
+{
+        return g_str_has_suffix (archive_entry_pathname (stream->entry), ".last.piece");
+}
+
+static void
+gxps_archive_input_stream_next_piece (GXPSArchiveInputStream *stream)
+{
+        gchar *dirname;
+        gchar *prefix;
+
+        if (!stream->is_interleaved)
+                return;
+
+        dirname = g_path_get_dirname (archive_entry_pathname (stream->entry));
+        if (!dirname)
+                return;
+
+        stream->piece++;
+        prefix = g_strdup_printf ("%s/[%u]", dirname, stream->piece);
+        g_free (dirname);
+
+        while (gxps_zip_archive_iter_next (stream->zip, &stream->entry)) {
+                if (g_str_has_prefix (archive_entry_pathname (stream->entry), prefix)) {
+                        const gchar *suffix = archive_entry_pathname (stream->entry) + strlen (prefix);
+
+                        if (g_ascii_strcasecmp (suffix, ".piece") == 0 ||
+                            g_ascii_strcasecmp (suffix, ".last.piece") == 0)
+                                break;
+                }
+                archive_read_data_skip (stream->zip->archive);
+        }
+
+        g_free (prefix);
+}
+
 static gssize
 gxps_archive_input_stream_read (GInputStream  *stream,
 				void          *buffer,
@@ -421,10 +490,19 @@ gxps_archive_input_stream_read (GInputStream  *stream,
 				GError       **error)
 {
 	GXPSArchiveInputStream *istream = GXPS_ARCHIVE_INPUT_STREAM (stream);
+        gssize                  bytes_read;
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, error))
 		return -1;
-	return archive_read_data (istream->zip->archive, buffer, count);
+
+        bytes_read = archive_read_data (istream->zip->archive, buffer, count);
+        if (bytes_read == 0 && istream->is_interleaved && !gxps_archive_input_stream_is_last_piece (istream)) {
+                /* Read next piece */
+                gxps_archive_input_stream_next_piece (istream);
+                bytes_read = gxps_archive_input_stream_read (stream, buffer, count, cancellable, error);
+        }
+
+	return bytes_read;
 }
 
 static gssize
@@ -446,10 +524,7 @@ gxps_archive_input_stream_close (GInputStream  *stream,
 	if (g_cancellable_set_error_if_cancelled (cancellable, error))
 		return FALSE;
 
-	if (istream->zip) {
-		gxps_zip_archive_destroy (istream->zip);
-		istream->zip = NULL;
-	}
+	g_clear_pointer (&istream->zip, gxps_zip_archive_destroy);
 
 	return TRUE;
 }
@@ -459,10 +534,7 @@ gxps_archive_input_stream_finalize (GObject *object)
 {
 	GXPSArchiveInputStream *stream = GXPS_ARCHIVE_INPUT_STREAM (object);
 
-	if (stream->zip) {
-		gxps_zip_archive_destroy (stream->zip);
-		stream->zip = NULL;
-	}
+	g_clear_pointer (&stream->zip, gxps_zip_archive_destroy);
 
 	G_OBJECT_CLASS (gxps_archive_input_stream_parent_class)->finalize (object);
 }

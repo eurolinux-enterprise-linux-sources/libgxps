@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -75,35 +77,35 @@ gxps_page_error_quark (void)
 }
 
 /* Images */
-cairo_surface_t *
+GXPSImage *
 gxps_page_get_image (GXPSPage    *page,
 		     const gchar *image_uri,
 		     GError     **error)
 {
-	cairo_surface_t *surface;
+	GXPSImage *image;
 
 	if (page->priv->image_cache) {
-		surface = g_hash_table_lookup (page->priv->image_cache,
-					       image_uri);
-		if (surface)
-			return cairo_surface_reference (surface);
+		image = g_hash_table_lookup (page->priv->image_cache,
+					     image_uri);
+		if (image)
+			return image;
 	}
 
-	surface = gxps_images_get_image (page->priv->zip, image_uri, error);
-	if (!surface)
+	image = gxps_images_get_image (page->priv->zip, image_uri, error);
+	if (!image)
 		return NULL;
 
 	if (!page->priv->image_cache) {
 		page->priv->image_cache = g_hash_table_new_full (g_str_hash,
 								 g_str_equal,
 								 (GDestroyNotify)g_free,
-								 (GDestroyNotify)cairo_surface_destroy);
+								 (GDestroyNotify)gxps_image_free);
 	}
 
 	g_hash_table_insert (page->priv->image_cache,
 			     g_strdup (image_uri),
-			     cairo_surface_reference (surface));
-	return surface;
+			     image);
+	return image;
 }
 
 /* FixedPage parser */
@@ -206,19 +208,27 @@ gxps_dash_array_parse (const gchar *dash,
 		       guint       *num_dashes_out)
 {
 	gchar  **items;
+        gchar   *stripped_dash;
 	guint    i;
         gdouble *dashes;
         guint    num_dashes;
 
-	items = g_strsplit (dash, " ", -1);
+        stripped_dash = g_strstrip (g_strdup (dash));
+	items = g_strsplit (stripped_dash, " ", -1);
+        g_free (stripped_dash);
 	if (!items)
 		return FALSE;
 
 	num_dashes = g_strv_length (items);
-	dashes = g_malloc (num_dashes * sizeof (gdouble));
+        if (num_dashes % 2 != 0) {
+                g_strfreev (items);
 
+                return FALSE;
+        }
+
+	dashes = g_malloc (num_dashes * sizeof (gdouble));
 	for (i = 0; i < num_dashes; i++) {
-                if (!gxps_value_get_double (items[i], &dashes[i])) {
+                if (!gxps_value_get_double_non_negative (items[i], &dashes[i])) {
                         g_free (dashes);
                         g_strfreev (items);
 
@@ -767,12 +777,14 @@ render_end_element (GMarkupParseContext  *context,
 
 		if (path->opacity_mask) {
 			gdouble x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+			cairo_path_t *cairo_path;
+
 			if (path->stroke_pattern)
 				cairo_stroke_extents (ctx->cr, &x1, &y1, &x2, &y2);
 			else if (path->fill_pattern)
 				cairo_fill_extents (ctx->cr, &x1, &y1, &x2, &y2);
 
-			cairo_path_t *cairo_path = cairo_copy_path (ctx->cr);
+			cairo_path = cairo_copy_path (ctx->cr);
 			cairo_new_path (ctx->cr);
 			cairo_rectangle (ctx->cr, x1, y1, x2 - x1, y2 - y1);
 			cairo_clip (ctx->cr);
@@ -1505,41 +1517,14 @@ gxps_page_finalize (GObject *object)
 {
 	GXPSPage *page = GXPS_PAGE (object);
 
-	if (page->priv->zip) {
-		g_object_unref (page->priv->zip);
-		page->priv->zip = NULL;
-	}
-
-	if (page->priv->source) {
-		g_free (page->priv->source);
-		page->priv->source = NULL;
-	}
-
-	if (page->priv->init_error) {
-		g_error_free (page->priv->init_error);
-		page->priv->init_error = NULL;
-	}
-
-	if (page->priv->lang) {
-		g_free (page->priv->lang);
-		page->priv->lang = NULL;
-	}
-
-	if (page->priv->name) {
-		g_free (page->priv->name);
-		page->priv->name = NULL;
-	}
-
-	if (page->priv->image_cache) {
-		g_hash_table_destroy (page->priv->image_cache);
-		page->priv->image_cache = NULL;
-	}
-
-	if (page->priv->anchors) {
-		g_hash_table_destroy (page->priv->anchors);
-		page->priv->anchors = NULL;
-		page->priv->has_anchors = FALSE;
-	}
+	g_clear_object (&page->priv->zip);
+	g_clear_pointer (&page->priv->source, g_free);
+	g_clear_error (&page->priv->init_error);
+	g_clear_pointer (&page->priv->lang, g_free);
+	g_clear_pointer (&page->priv->name, g_free);
+	g_clear_pointer (&page->priv->image_cache, g_hash_table_destroy);
+	g_clear_pointer (&page->priv->anchors, g_hash_table_destroy);
+	page->priv->has_anchors = FALSE;
 
 	G_OBJECT_CLASS (gxps_page_parent_class)->finalize (object);
 }

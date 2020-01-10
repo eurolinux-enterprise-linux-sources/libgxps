@@ -1,0 +1,1317 @@
+commit ebf3cf7aa81c03458bf695bf0d6d1c0d4361802a
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   2012-03-10
+
+    Update COPYING to lgpg2.1 to match source file headers
+
+    I copied the COPYING file without checking it was lgpl2 text
+    instead of
+    lpgl2.1.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=671271
+
+M	COPYING
+
+commit ee511c680406b30479f67add05b4ed1b468f9a97
+Author: Michael Biebl <biebl@debian.org>
+Date:	2012-03-03
+
+    build: Fix INCLUDES for libgxps-scan.c
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=671274
+
+M	docs/reference/Makefile.am
+
+commit 9c3705b79dbade31368fa438abab498559a47c45
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-02-04
+
+    docs: Add GXPSFilePrivate to the private section of GXPSFile in
+    libgxps-sections.txt
+
+M	docs/reference/libgxps-sections.txt
+
+commit 2532f6ed77db56a721c1a6a1cac002688c0a6da1
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-02-04
+
+    docs: Ignore private headers when generating API doc
+
+    Fixes most of the symbols in libgxps-unused.txt
+
+M	docs/reference/Makefile.am
+
+commit d252207c926b90fdc32d836a9dc69855f6a2b726
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-02-04
+
+    docs: Add index of new symbols in 0.2.1
+
+M	docs/reference/libgxps-docs.sgml
+
+commit 2908149917e3133bbfc873246ab71f3676b73045
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-02-04
+
+    doc: Add Since: tag to GXPS_VERSION_STRING api docs
+
+M	libgxps/gxps-version.h.in
+
+commit bff39ad37b3c0624f7e95ba72867df99f2661134
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-12-23
+
+    Fixed memory leak when parsing fails for a child element of a Canvas
+
+    A GXPSCanvas struct is leaked when parsing fails for a child element
+    of a Canvas.  Parsing is aborted when invalid data is encountered and
+    cleanup code is not run.  This adds a error handler to the canvas
+    GMarkupParser to free the struct on error.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=668965
+
+M	libgxps/gxps-page.c
+
+commit 19e5c5834d493075283d82a0d8d410463646c849
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-12-24
+
+    Fixed memory leak when parsing fails for a child element of a Glyphs
+
+    A GXPSGlyphs struct is leaked when parsing fails for a child element
+    of a Glyphs.  Parsing is aborted when invalid data is encountered and
+    cleanup code is not run.  This adds a error handler to the glyphs
+    GMarkupParser to free the struct on error.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=668966
+
+M	libgxps/gxps-glyphs.c
+
+commit 4874d0f48dd3a72865d4df579cb3563c520f6d6a
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2012-01-06
+
+    Fixed memory leak when parsing a brush fails
+
+    A GXPSBrush struct is leaked when parsing fails for a child of a
+    XXX.Fill or XXX.Stroke element.  Parsing is aborted when invalid data
+    is encountered and cleanup code is not run.  This adds a error handler
+    to the brush GMarkupParser to free the struct on error.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=668968
+
+M	libgxps/gxps-brush.c
+
+commit 2bb45e1566fb03bf3bb5fd3b9ad96eec54da9a2a
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2012-01-08
+
+    Fixed memory leak when parsing a ImageBrush element fails
+
+    A GXPSBrushImage struct is leaked when parsing fails for a child
+    element of a ImageBrush.  Parsing is aborted when invalid data is
+    encountered and cleanup code is not run.  This adds a error handler to
+    the brush_image GMarkupParser to free the struct on error.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=668969
+
+M	libgxps/gxps-brush.c
+
+commit 82d3a0d61a29812a94a80769cb3f47ee49453329
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-12-23
+
+    Fixed memory leak when parsing a RenderTransform element fails
+
+    A GXPSMatrix struct is leaked when parsing fails for a
+    XXX.RenderTransform element.  Parsing is aborted when invalid data is
+    encountered and cleanup code is not run.  This adds a error handler to
+    the matrix GMarkupParser to free the struct on error.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=668941
+
+M	libgxps/gxps-matrix.c
+
+commit ca12aae0e8fd69b5774b0ff69138957340eb2ff7
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2012-01-28
+
+    Fixed memory leak when parsing fails for a child element of a Path
+
+    A GXPSPath struct is leaked when parsing fails for a child element of
+    a Path.  Parsing is aborted when invalid data is encountered and
+    cleanup code is not run.  This adds a error handler to the path
+    GMarkupParser to free the struct on error.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=668940
+
+M	libgxps/gxps-path.c
+
+commit e2bad1211d0790e7d05ebb6f83da3572d95c3a56
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-12-23
+
+    Fixed memory leak when parsing a Path attribute fails
+
+    Fixed leak where a GXPSPath struct is leaked when a XPS document
+    contains a Path element with invalid attributes.
+
+    For example:
+    <Path Stroke="asdf" />
+    <Path Fill="asdf" />
+    ...etc
+
+    This patch calls gxps_path_free in more code paths.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=668937
+
+M	libgxps/gxps-page.c
+
+commit 6a6cf1e2cb96a0bd9770a428e41b6786e0fdddc9
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-01-29
+
+    tools: Set image parameters after jpeg_set_defaults()
+
+    So the resolution does not get overwritten by the defaults. Based on
+    patch by Adrian Johnson for poppler.
+
+M	tools/gxps-jpeg-writer.c
+
+commit c01d234e7036a5d469e122bd54de83171e66ca80
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-01-21
+
+    release: 0.2.1
+
+M	NEWS
+M	configure.ac
+
+commit 2aae8118946a7fd09a9c73685dad0d8f6d07a745
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-01-21
+
+    Add gxps-version.h to gxps.h
+
+M	libgxps/gxps.h
+
+commit 9c5daf15dc6614f01f003ed91161e9a11c396331
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-01-21
+
+    Fix MAJOR/MINOR/MICRO version macros
+
+    We need to add a space between macro name and parentheses so that it's
+    not considered a macro parameter.
+
+M	libgxps/gxps-version.h.in
+
+commit b1f6b095de401b9eef60ff54565e3c6f5bbb454b
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2012-01-21
+
+    Add GXPS_VERSION_STRING macro with the version number as a string
+
+M	docs/reference/libgxps-sections.txt
+M	libgxps/gxps-version.h.in
+
+commit 0997fec01b99c293998de0d05be732dbbe0e03a4
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-11-26
+
+    Support OpacityMask for Path elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=663477
+
+M	libgxps/gxps-page.c
+M	libgxps/gxps-path.c
+M	libgxps/gxps-path.h
+
+commit b16bacce3667252586231adc1935441b3543e7b5
+Author: Thomas Freitag <thomas.freitag@kabelmail.de>
+Date:	2012-01-07
+
+    regtest: read stderr output before calling wait to fix a possible
+    deadlock
+
+    In the way the scripts starts it subprocesses, stderr becomes buffered
+    for the subprocesses. And unforunately, when the buffer limit is
+    reached, the subprocess suspends it work until it can print again on
+    stderr. That's why the python script runs into a deadlock when the
+    subprocess produces a lot of error messages. A small rearrange of the
+    commands, first read the stderr output and then wait that the
+    subprocess
+
+M	regtest/Test.py
+
+commit 55cc6ad72987597f4c0429bef10d4cb24d3138ad
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-25
+
+    COPYING: Fix FSF address
+
+M	COPYING
+
+commit 5a63ac53db13fe75b9105ee7b4c03dfeaac54247
+Author: Alexandre Rostovtsev <tetromino@gentoo.org>
+Date:	2011-11-23
+
+    Fix building with libpng15
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=664666
+
+M	tools/gxps-png-writer.c
+
+commit 7bc33181d7e44aab35db01d4ac1560dcf408d5d9
+Author: Dominique Leuenberger <dimstar@opensuse.org>
+Date:	2011-11-21
+
+    Build: link with libm. Fixes bgo#664439.
+
+M	configure.ac
+M	tools/Makefile.am
+
+commit dece65deaf41c156c183e1c9fb87cab0775a4f33
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-20
+
+    Add missing file gxps-path.h
+
+A	libgxps/gxps-path.h
+
+commit b0a6a8f32accb8164abbea7f9dc140ff5f126ad6
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-19
+
+    release: 0.2.0
+
+M	NEWS
+M	configure.ac
+
+commit f5c4eeaf22f18956953141a713cceeba18f6a4c9
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-19
+
+    RELEASING: Add new private headers to the command used to get new API
+
+M	RELEASING
+
+commit 53bef7877d7e6c375d7d0cebb4fd1d76aabdb417
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-19
+
+    TODO: Remove Smooth Cubic Bézier curve
+
+M	TODO
+
+commit 1a305fd8fd4fb7b00eddf3f03e975a6720c8dcee
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-19
+
+    docs: Add man pages for tools
+
+M	Makefile.am
+M	configure.ac
+M	docs/Makefile.am
+A	docs/tools/Makefile.am
+A	docs/tools/xpstojpeg.xml
+A	docs/tools/xpstopdf.xml
+A	docs/tools/xpstopng.xml
+A	docs/tools/xpstops.xml
+A	docs/tools/xpstosvg.xml
+
+commit 616e3ec998d5316516f37b419120f19506416752
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-17
+
+    Move GXPSGlyphs code to a new file
+
+M	libgxps/Makefile.am
+A	libgxps/gxps-glyphs.c
+A	libgxps/gxps-glyphs.h
+M	libgxps/gxps-page.c
+
+commit 8a0d792758332d484f5025b59e207153d507d978
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-17
+
+    Move GXPSPath code to a new file
+
+M	libgxps/Makefile.am
+M	libgxps/gxps-page.c
+A	libgxps/gxps-path.c
+
+commit e9052ccec99bcd337d148656147201da287d5a5e
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-17
+
+    Move gxps_boolean_parse() to from gxps-page to gxps-parse-utils
+
+    And rename it to gxps_value_get_boolean() for consistency, checking
+    also
+    the value is 'true' or 'false' as the spec says they are the only
+    valid
+    values.
+
+M	libgxps/gxps-page.c
+M	libgxps/gxps-parse-utils.c
+M	libgxps/gxps-parse-utils.h
+
+commit 7e3635a6cac36cb8f29251d15046b477914bcab6
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-14
+
+    Move GXPSBrush code to a new file
+
+M	libgxps/Makefile.am
+A	libgxps/gxps-brush.c
+A	libgxps/gxps-brush.h
+M	libgxps/gxps-page.c
+
+commit 431c98fe2f4f3b07b2f442607cebb35ed368d5a9
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-14
+
+    Make gxps_page_get_image() public internally
+
+M	libgxps/gxps-page-private.h
+M	libgxps/gxps-page.c
+
+commit bb1511e6c8454b4a5259d6d2264544919ab6065e
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-14
+
+    Add private internal method gxps_page_render_parser_push()
+
+M	libgxps/gxps-page-private.h
+M	libgxps/gxps-page.c
+
+commit 3d43748b21db8ab44bd4479246bbf2428dc0e76b
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-14
+
+    Move gxps_point_parse() from gxps-page to gxps-parse-utils
+
+M	libgxps/gxps-page.c
+M	libgxps/gxps-parse-utils.c
+M	libgxps/gxps-parse-utils.h
+
+commit 17dbda82fff2232223ff34a9a61942333366136b
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-14
+
+    Move GXPSMatrix code to a new file
+
+M	libgxps/Makefile.am
+A	libgxps/gxps-matrix.c
+A	libgxps/gxps-matrix.h
+A	libgxps/gxps-page-private.h
+M	libgxps/gxps-page.c
+
+commit 2a421755ee71ebff84f693223a6f58ba38cbb232
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-12
+
+    Add debug message to notify ArcSegment is not supported
+
+M	libgxps/gxps-page.c
+
+commit ca5bb785ac77ffacc8d8ff83c241fbdc9dc62a95
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-12
+
+    Add support for PolyQuadraticBezierSegment figures
+
+M	libgxps/gxps-page.c
+
+commit c45b4d88e61f96e1082f697c995282971cfd7647
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-12
+
+    Check required attributes of PathGeometry elements
+
+M	libgxps/gxps-page.c
+
+commit 411634745dcdbcfd109daacc19fac76ced7331cd
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-12
+
+    Add support for Smooth Cubic Bézier curve
+
+M	libgxps/gxps-page.c
+
+commit d9809b2a05f3d80800b07b5f816766583e863f15
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-11-11
+
+    Fixed attribute_name and element_name being switched in
+    gxps_parse_error
+
+    When gxps_parse_error is called with error_type
+    G_MARKUP_ERROR_INVALID_CONTENT, the GError message produced has the
+    attribute_name and element_name switched.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=663899
+
+M	libgxps/gxps-parse-utils.c
+
+commit 44034e1b2e095b6b46bc7d4fb425ff95181b3170
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-10
+
+    Initial implementation of ICC based colors
+
+    Only CMYK colors are supported for now. Little CMS2 has been added
+    as an
+    optional dependency.
+
+M	configure.ac
+M	libgxps/Makefile.am
+A	libgxps/gxps-color.c
+A	libgxps/gxps-color.h
+M	libgxps/gxps-page.c
+
+commit 61908681df73373f2b39e68d8f4e5e35a27e6062
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-11-08
+
+    Support Opacity for SolidColorBrush elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=663472
+
+M	libgxps/gxps-page.c
+
+commit 9907bf59151abbf3c0a22052d63604e5fc948194
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Add support for scRGB color syntax
+
+M	libgxps/gxps-page.c
+
+commit e2fee33fe68deffe5592824a4c1c33b195347caf
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Implement Quadratic Bézier curve
+
+M	TODO
+M	libgxps/gxps-page.c
+
+commit 073625bf126e668b5a6bacd3bce9c6303b6371e4
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-11-04
+
+    Support OpacityMask for Glyphs elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=663476
+
+M	libgxps/gxps-page.c
+
+commit 2a801cb26952ab6425cda3318057dcf2b2917096
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    regtest: Skip tests with results when creating refs
+
+    Not only tests that have md5, but also crashed or failed tests.
+
+M	regtest/Test.py
+M	regtest/TestReferences.py
+
+commit ae58cd1166e1e353f0534bcd074ed60dd57eda0d
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-11-04
+
+    Support OpacityMask for Canvas elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=663475
+
+M	libgxps/gxps-page.c
+
+commit b0a853397b5ab5c360ed8e3b600eb3a8f407b51b
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Don't check alpha value before adding gradient color stops
+
+    cairo_pattern_add_color_stop_rgb() calls
+    cairo_pattern_add_color_stop_rgba() with alpha = 1, so we can
+    always use
+    cairo_pattern_add_color_stop_rgba().
+
+M	libgxps/gxps-page.c
+
+commit 92341b3a54916bff61a134782e9837a1e0956a9d
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Don't check alpha value before creating solid color patterns
+
+    cairo_pattern_create_rgb() calls cairo_pattern_create_rgba() with
+    apha = 1, so we can always use cairo_pattern_create_rgba().
+
+M	libgxps/gxps-page.c
+
+commit ff46d94c94af4f04cfcfafe0f01c3777cebadab3
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-11-04
+
+    Support opacity for ImageBrush elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=663471
+
+M	libgxps/gxps-page.c
+
+commit 189194e95109d92a2248a5a434ee7de4d99aa983
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    docs: Clarify that page sizes returned by document might be different
+    than actual page sizes
+
+M	libgxps/gxps-document.c
+
+commit 3eb33debc7272a18d75718b86472c8f4bac79a75
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Use gxps_value_get_double_positive() to parse page sizes
+
+    And report an error if Width or Height are missing or fail to parse
+    since they are required attributes of FixedPage. Even though all XPS
+    documents we have for testing use integer values for page sizes, the
+    spec says with/height are real numbers greater or equal than 1.
+    This commit breaks the API because gxps_document_get_page_size() and
+    gxps_page_get_size() return gdouble instead of guint values now.
+
+M	libgxps/gxps-document.c
+M	libgxps/gxps-document.h
+M	libgxps/gxps-page.c
+M	libgxps/gxps-page.h
+M	test/test-gxps.c
+M	tools/gxps-image-converter.c
+M	tools/gxps-print-converter.c
+
+commit 45f5bb25dd38e6241ecd6d3e2daa78e6dd0fb585
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Add gxps_value_get_double_positive() to parse positive real numbers
+
+    It's the same than gxps_value_get_double() but this one fails if the
+    parsed number is not greater or equal than 1.
+
+M	libgxps/gxps-parse-utils.c
+M	libgxps/gxps-parse-utils.h
+
+commit 00fab4bd96fdcf7c5b6b6d392d3eb2b766aad523
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Use gxps_value_get_int() to parse glyphs BidiLevel
+
+    And report error if it fails
+
+M	libgxps/gxps-page.c
+
+commit ddfb6f2e5618c79a571eac4114c825ba9c3680e1
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Use gxps_value_get_double() instead of strtod/g_ascii_srtod
+
+    And report errors when it fails to parse double values.
+
+M	libgxps/gxps-page.c
+
+commit e63b13d4fce442dc4563e5e442345d2dc8e02bbe
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-06
+
+    Add gxps_value_get_double() to parse double values
+
+M	libgxps/gxps-parse-utils.c
+M	libgxps/gxps-parse-utils.h
+
+commit c5f7d532226bdeaf9bfb92868257c54fa70b056c
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-03
+
+    Use g_ascii_strtoll() instead of strtol in gxps_value_get_int()
+
+M	libgxps/gxps-parse-utils.c
+
+commit 144cdbb201cd860480e70fd8c94ac3d8dc58a123
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-01
+
+    Use GXPS_DEBUG instead of g_warning/g_debug directly
+
+M	libgxps/gxps-file.c
+M	libgxps/gxps-images.c
+
+commit 2b9c3259c5bce182d423c207e5c7786e5a13d301
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-01
+
+    Add regressions test program
+
+    It's the same program I wrote for poppler, but adapted to libgxps and
+    without the backends part.
+
+M	TODO
+A	regtest/Config.py
+A	regtest/Test.py
+A	regtest/TestReferences.py
+A	regtest/TestRun.py
+A	regtest/Timer.py
+A	regtest/Utils.py
+A	regtest/commands/__init__.py
+A	regtest/commands/create-refs.py
+A	regtest/commands/run-tests.py
+A	regtest/gxps-regtest
+A	regtest/main.py
+
+commit 85345ef3395ca9bcde196de6a0e74ea5fb76f2e2
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-09-12
+
+    Support opacity for Glyphs elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=662654
+
+M	libgxps/gxps-page.c
+
+commit d5b60a831be69c0c08d2850937a6a866c6291338
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-09-12
+
+    Support opacity for Canvas elements
+
+    Creates a new GXPSCanvas typedef to hold the opacity value.
+    https://bugzilla.gnome.org/show_bug.cgi?id=662653
+
+M	libgxps/gxps-page.c
+
+commit 792e37f16ddae40bd824dc6de12fdac051617b4a
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-09-06
+
+    Support opacity for Path elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=662652
+
+M	libgxps/gxps-page.c
+
+commit 6c0688cc6f1f4a7593bbb74630bd4c0a4600eaab
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-09-16
+
+    Support opacity for LinearGradientBrush and RadialGradientBrush
+    elements
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=662655
+
+M	libgxps/gxps-page.c
+
+commit 3415335e32f06416146938198f40803de2431514
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-01
+
+    docs: Add libgxps.types
+
+A	docs/reference/libgxps.types
+
+commit 93ef0e3a204f097af4e4b1a3623f1ad4ad9a999e
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-11-01
+
+    doc: Document return value of gxps_document_get_page()
+
+M	libgxps/gxps-document.c
+
+commit ab3e815de622122df60b44af559dbddd0d33b5c8
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-30
+
+    Add download and bugzilla information to doap file
+
+M	libgxps.doap
+
+commit 3c397fdff7129c1d47a1a90d71a6f01085671e3f
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-30
+
+    TODO: Remove adding tools
+
+    We have some inital tools now
+
+M	TODO
+
+commit f2bca61794f94998d4774eca9f6977c31732e046
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-30
+
+    tools: Add xpstojpeg tool
+
+M	configure.ac
+M	tools/Makefile.am
+A	tools/gxps-jpeg-converter.c
+A	tools/gxps-jpeg-converter.h
+A	tools/gxps-jpeg-writer.c
+A	tools/gxps-jpeg-writer.h
+
+commit 017759d4b9a20fbb920fde326167a76e4258541e
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-30
+
+    tools: Add xpstosvg tool
+
+M	configure.ac
+M	tools/Makefile.am
+A	tools/gxps-svg-converter.c
+A	tools/gxps-svg-converter.h
+
+commit 8ca6d60d9904b3ab986974deb9055655db553cae
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-30
+
+    tools: Add xpstops tool
+
+M	configure.ac
+M	tools/Makefile.am
+A	tools/gxps-ps-converter.c
+A	tools/gxps-ps-converter.h
+
+commit 63449fb61972757fd2cb589f456a2eb7b26b4379
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-29
+
+    tools: Add xpstopdf tool
+
+M	configure.ac
+M	tools/Makefile.am
+A	tools/gxps-pdf-converter.c
+A	tools/gxps-pdf-converter.h
+
+commit b917110b5159d6f8ec484fba8d2e058d80af3418
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-29
+
+    Add generic converter to printing formats
+
+    Abstract class to handle options common to printing formats like
+    PDF or
+    PostScript.
+
+M	tools/Makefile.am
+A	tools/gxps-print-converter.c
+A	tools/gxps-print-converter.h
+
+commit 0ebc9920c72d5201f0c70725401c2ec8b276171a
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-29
+
+    tools: Save input filename in GXPSConverter
+
+M	tools/gxps-converter.c
+M	tools/gxps-converter.h
+
+commit 4127140589b7c25b13f049ddab4b4e0c11532e83
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-29
+
+    tools: Add xpstopng tool
+
+M	configure.ac
+M	tools/Makefile.am
+A	tools/gxps-converter-main.c
+A	tools/gxps-png-converter.c
+A	tools/gxps-png-converter.h
+A	tools/gxps-png-writer.c
+A	tools/gxps-png-writer.h
+
+commit 9a1bc870fc39cc54a6b500b3a63fc375d887d385
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-29
+
+    tools: Add generic converter to image formats
+
+    It implements some of the GXPSConverter methods but it's also an
+    bastract class that needs concrete implementation for every image
+    output
+    format.
+
+M	tools/Makefile.am
+A	tools/gxps-image-converter.c
+A	tools/gxps-image-converter.h
+A	tools/gxps-image-writer.c
+A	tools/gxps-image-writer.h
+
+commit 8f861f1bd70af7c0a66e00e79688c7b7aa388364
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-29
+
+    tools: Add small library to be used by tools
+
+    At the moment it's just a GXPSConverter abstract class with default
+    implementation.
+
+M	Makefile.am
+M	configure.ac
+A	tools/Makefile.am
+A	tools/gxps-converter.c
+A	tools/gxps-converter.h
+
+commit 695c422034a9b31a97767850e254e98d488a7a43
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-12
+
+    release: 0.1.0
+
+    Previous commit is wrong, I forgot to update version number in
+    configure.ac because I thought it was already 0.1.0 :-(
+
+M	configure.ac
+
+commit de1705584db0fd176c80df590ca73b46b800980a
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-12
+
+    release: 0.1.0
+
+M	NEWS
+
+commit bbad32e9e2bad68e36178b19fb46e026afb433e9
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-12
+
+    Add RELEASING file with instructions to make releases
+
+A	RELEASING
+
+commit 81bc2fa415c61fbb518cd66081b86e7b9bfefb63
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-12
+
+    Add rules to create ChangeLog
+
+M	Makefile.am
+
+commit 3f44aea51ac9e9e37157de1eb9a03eda84235402
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-12
+
+    Add homepage to doap file
+
+M	libgxps.doap
+
+commit 9531079bc9c942eba02e5b02ff8c8caf9d10ce3b
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-11
+
+    Add version macros
+
+M	TODO
+M	configure.ac
+M	docs/reference/libgxps-docs.sgml
+M	docs/reference/libgxps-sections.txt
+M	libgxps/Makefile.am
+A	libgxps/gxps-version.h.in
+
+commit ce828051dba5e961a8bb64a51b032020db7558ec
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-11
+
+    test-gxps: Port to GTK 3
+
+M	configure.ac
+M	test/test-gxps.c
+
+commit c4ca9a11cb4b46d09703bf0ec8ff570961112605
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-11
+
+    configure: Bump cairo requirements to 1.10
+
+M	configure.ac
+
+commit dee95ab03b863cbac04ab17fb94a14c741bc73c1
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-11
+
+    TODO: Font clusters done
+
+M	TODO
+
+commit 303393336f4a6ece0699d00abafe3f16423e8ea8
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-11
+
+    Add debug mode instead of using g_print/g_warning directly
+
+M	configure.ac
+M	libgxps/Makefile.am
+A	libgxps/gxps-debug.c
+A	libgxps/gxps-debug.h
+M	libgxps/gxps-file.c
+M	libgxps/gxps-page.c
+
+commit 4963867edbece91865e3aa03b58608f3a163b9de
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-10-09
+
+    Fixed memory leak when UnicodeString and Indices are missing from
+    Glyphs
+
+M	libgxps/gxps-page.c
+
+commit 8b52eb1f15e4c62d076da43ed9fe08fa8991aa76
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-09
+
+    Add Jason Crain to AUTHORS
+
+M	AUTHORS
+
+commit a3a94a69118986678f78dacbdbf80f47946cb593
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-09
+
+    Only use cairo_show_text_glyphs() if the target surface supports it
+
+M	libgxps/gxps-page.c
+
+commit 4ecc04bf42ade12dfd1cbcbcada4562553782463
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-09
+
+    Do not check for NULL when using g_strdup()
+
+    g_strdup() is NULL safe
+
+M	libgxps/gxps-page.c
+
+commit 66ddaaa3f5aff177978e52ba650086c23972eb0e
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-10-09
+
+    Add support for italic text
+
+M	libgxps/gxps-page.c
+
+commit db2d71033de84b196c4713d1f8091187ec20bac5
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-10-09
+
+    Add support for sideways text
+
+M	libgxps/gxps-page.c
+
+commit e2f6f489b5dd86e58297c70ff1f5ccf06de5bc5a
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-10-09
+
+    Add support for bidirectional text
+
+M	libgxps/gxps-page.c
+
+commit 9857869e2b0b6c6358cc9f90540791bd315883e2
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-10-09
+
+    Improve text rendering
+
+     - Clusters handling
+     - Vertical and horizontal offsets
+     - UnicodeString beginning with the escape sequence {}
+
+M	libgxps/gxps-page.c
+
+commit 6e7f23b72fa6ffab794cc2956af7d59700318a77
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-08
+
+    Add g_return macros missing in some public methods
+
+M	libgxps/gxps-file.c
+M	libgxps/gxps-links.c
+M	libgxps/gxps-page.c
+
+commit ea1dfc11e3639aeada0adcc0743000607623ac64
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-08
+
+    Add GObject introspection support
+
+M	Makefile.am
+M	TODO
+M	configure.ac
+M	libgxps/Makefile.am
+M	libgxps/gxps-document.c
+M	libgxps/gxps-file.c
+
+commit 40e7c583543b9b57ddd1e74541fda0771b5ac06f
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2011-10-08
+
+    docs: Add API docs
+
+M	Makefile.am
+M	TODO
+M	configure.ac
+A	docs/Makefile.am
+A	docs/reference/Makefile.am
+A	docs/reference/libgxps-docs.sgml
+A	docs/reference/libgxps-sections.txt
+A	docs/reference/version.xml.in
+M	libgxps/gxps-document-structure.c
+M	libgxps/gxps-document-structure.h
+M	libgxps/gxps-document.c
+M	libgxps/gxps-document.h
+M	libgxps/gxps-error.c
+M	libgxps/gxps-error.h
+M	libgxps/gxps-file.c
+M	libgxps/gxps-file.h
+M	libgxps/gxps-links.c
+M	libgxps/gxps-links.h
+M	libgxps/gxps-page.c
+M	libgxps/gxps-page.h
+
+commit 6641e75e30c1bd2f53bd80bf934919001bbcb629
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-09-01
+
+    Fixed read of uninitialized memory in gxps_parse_stream()
+
+    When a stream contains only a BOM, gxps_parse_stream() can pass a
+    negative length to g_markup_parse_context_parse() causing it to read
+    uninitialized memory.
+
+M	libgxps/gxps-parse-utils.c
+
+commit d4bb8cede704e7e35c4c7339aff46ffbbd98a852
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-08-02
+
+    Fixed crash in gxps_file_new()
+
+    gxps_file_new() crashes when passed a directory or a nonexistant
+    file.
+
+M	libgxps/gxps-archive.c
+M	libgxps/gxps-archive.h
+M	libgxps/gxps-file.c
+
+commit 39eb02782ec6952e3e8e9ed5d237f9ba0e697b1b
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-07-31
+
+    Improved error checking when parsing a broken FixedDocumentSequence
+
+M	libgxps/gxps-file.c
+
+commit 82c15dc45d4cd322c36e27fb2e882cd0043ff334
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-07-31
+
+    More flexible parsing in gxps_points_parse()
+
+    Allows points to be separated by more than one space.
+
+M	libgxps/gxps-page.c
+
+commit c926d7c2de6c0bb37ba562936bad0522fcea4319
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-07-29
+
+    Fixed memory leak in render_end_element()
+
+    Call gxps_path_free in more places
+
+M	libgxps/gxps-page.c
+
+commit 2efbedc7cfd9087da77a7d77fe58823448108bfb
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-07-29
+
+    Fixed memory leak in GXPSDocument
+
+    Free init_error when finalized.
+
+M	libgxps/gxps-document.c
+
+commit 9cee1d2c51b4256b454185aa219eff4f848c9358
+Author: Jason Crain <jason@aquaticape.us>
+Date:	2011-07-29
+
+    Fixed memory leak in GXPSFile
+
+    Free init_error when finalized.
+
+M	libgxps/gxps-file.c
+
+commit eead70cb1edf8941482891999f65b4b50398a57c
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-06
+
+    Use g_file_resolve_relative_path() instead of our buggy code
+
+    g_file_resolve_relative_path() works even if the path doesn't exist in
+    the file system, so it works for us.
+
+M	libgxps/gxps-parse-utils.c
+
+commit 562902f96499d4ad59f69c966e4d0feef3289420
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-05
+
+    Fix assertion that fails when building the outline for some documents
+
+M	libgxps/gxps-document-structure.c
+
+commit 5813b44653cfb0dbcdf302d150ff88b66448c0d0
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-05
+
+    Add missing files
+
+    I forgot to git add gxps-document-structure.[ch]. Thanks chpe!
+
+A	libgxps/gxps-document-structure.c
+A	libgxps/gxps-document-structure.h
+
+commit d2baf3610f7d3db48ab2c400e798b56303beecc5
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Update TODO file
+
+M	TODO
+
+commit cad35b16ed158529cbbcdf82662bbd78e466b2a8
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Add initial document structure support
+
+    Document structure contains the document outline and story
+    elements. At
+    the moment only document outline is supported.
+
+M	libgxps/Makefile.am
+M	libgxps/gxps-document.c
+M	libgxps/gxps-document.h
+M	libgxps/gxps-private.h
+M	libgxps/gxps.h
+
+commit 7f7afa79e3c8ab4027e31661ee36b0352b4145e2
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Add support for page links
+
+    It adds gxps_page_get_links() that returns a list of GXPSLink
+
+M	libgxps/gxps-page.c
+M	libgxps/gxps-page.h
+
+commit 38961c62b333d4b52121474abce2c064a4b3553f
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Add gxps_page_get_anchor_destination()
+
+    It returns the area of the page that is the destination of the given
+    anchor.
+
+M	libgxps/gxps-page.c
+M	libgxps/gxps-page.h
+
+commit 7d91073cfba3a06ccfb258be33c8313226986260
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Add gxps_document_get_page_for_anchor()
+
+    It returns the page number that is the destination of the given anchor
+
+M	libgxps/gxps-document.c
+M	libgxps/gxps-document.h
+
+commit 295c39967e4a61e2e814b77574963188c755c08e
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Add gxps_file_get_document_for_link_target()
+
+    It returns the document id that is the destination fo the given link
+    target, or -1 if the document is not found in the file.
+
+M	libgxps/gxps-file.c
+M	libgxps/gxps-file.h
+
+commit 0509d4258986afd06252858b9ee355840bf5cc87
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Add GXPSLink and GXPSLinkTarget boxed types
+
+    GXPSLink represents a hyperlink in a page and GXPSLinkTarget is a
+    hyperlink destination.
+
+M	libgxps/Makefile.am
+A	libgxps/gxps-links.c
+A	libgxps/gxps-links.h
+M	libgxps/gxps-private.h
+M	libgxps/gxps.h
+
+commit 13bed8aa2c23d149fc7875ddc355f39386f2e61d
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-09-03
+
+    Add gxps_archive_has_entry() to check whether an entry exists
+    in archive
+
+M	libgxps/gxps-archive.c
+M	libgxps/gxps-archive.h
+
+commit 18b30745869ef02761d2ccc24bef71fae08fe845
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2010-08-08
+
+    Initial import
+
+A	AUTHORS
+A	COPYING
+A	MAINTAINERS
+A	Makefile.am
+A	NEWS
+A	README
+A	TODO
+A	autogen.sh
+A	configure.ac
+A	libgxps.doap
+A	libgxps.pc.in
+A	libgxps/Makefile.am
+A	libgxps/gxps-archive.c
+A	libgxps/gxps-archive.h
+A	libgxps/gxps-document.c
+A	libgxps/gxps-document.h
+A	libgxps/gxps-error.c
+A	libgxps/gxps-error.h
+A	libgxps/gxps-file.c
+A	libgxps/gxps-file.h
+A	libgxps/gxps-fonts.c
+A	libgxps/gxps-fonts.h
+A	libgxps/gxps-images.c
+A	libgxps/gxps-images.h
+A	libgxps/gxps-page.c
+A	libgxps/gxps-page.h
+A	libgxps/gxps-parse-utils.c
+A	libgxps/gxps-parse-utils.h
+A	libgxps/gxps-private.h
+A	libgxps/gxps.h
+A	test/Makefile.am
+A	test/test-gxps.c
